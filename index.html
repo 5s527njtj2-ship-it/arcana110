@@ -1271,10 +1271,11 @@ function renderSub(){
 }
 
 /* ═══ ОПЛАТА ЧЕРЕЗ TELEGRAM STARS ═══ */
+const BOT_API_URL = 'https://arcana110-production.up.railway.app';
+
 function sub(pl){
   const tg=window.Telegram&&window.Telegram.WebApp;
 
-  // Вне Telegram (тест в браузере) — активируем сразу
   if(!tg||!tg.initDataUnsafe||!tg.initDataUnsafe.user){
     S.plan=pl;
     localStorage.setItem('arc_plan',pl);
@@ -1283,9 +1284,38 @@ function sub(pl){
     return;
   }
 
-  // Внутри Telegram — отправляем боту запрос на создание инвойса
+  const userId = tg.initDataUnsafe.user.id;
   toast('Открываем оплату…');
-  tg.sendData('buy:'+pl);
+
+  fetch(BOT_API_URL + '/create-invoice', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan: pl, user_id: userId })
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        toast('Ошибка: ' + data.error);
+        return;
+      }
+      tg.openInvoice(data.invoice_url, function(status){
+        if (status === 'paid') {
+          S.plan = pl;
+          localStorage.setItem('arc_plan', pl);
+          renderSub(); renderProf(); applyLocks();
+          if (typeof refreshLocks === 'function') refreshLocks();
+          toast('Arcana '+planLbl(pl)+' активирован ✦');
+        } else if (status === 'cancelled') {
+          toast('Оплата отменена');
+        } else if (status === 'failed') {
+          toast('Оплата не удалась');
+        }
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      toast('Не удалось создать счёт. Попробуйте позже.');
+    });
 }
 
 /* ═══ TOAST ═══ */
