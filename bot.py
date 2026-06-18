@@ -122,7 +122,8 @@ async def handle_donate_screenshot(message: Message):
             user_id,
             f"🌟 *Спасибо за поддержку!*\n\n"
             f"Ваш промокод на Arcana Premium:\n`{PROMO_CODE}`\n\n"
-            f"Введите его в приложении на вкладке «Тариф», в поле «Промокод».",
+            f"Введите его в приложении на вкладке «Тариф», в поле «Промокод».\n\n"
+            f"Промокод создан при поддержке друзей из [Blog X — MediaOS](https://blogxstudio.com/)",
             parse_mode="Markdown"
         )
 
