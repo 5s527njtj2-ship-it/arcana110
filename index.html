@@ -314,6 +314,7 @@ body{color:var(--text);font-family:'Inter',sans-serif;font-size:14px;-webkit-fon
         <div class="attr"><div class="attr-lbl">Арканы</div><div class="attr-val" id="attr-ar"></div></div>
         <div class="attr"><div class="attr-lbl">Число</div><div class="attr-val" id="attr-num"></div></div>
       </div>
+      <button id="deep-btn-day" class="btn btn-o" style="display:none;margin:0 0 12px" onclick="">🔮 Что это значит?</button>
       <div class="msg-block fi"><div class="msg-lbl a">Послание дня</div><p class="msg-t" id="rev-meaning"></p><div class="sep"></div><div class="msg-lbl g">Совет</div><p class="msg-t" id="rev-advice"></p></div>
     </div>
   </div>
@@ -417,6 +418,7 @@ body{color:var(--text);font-family:'Inter',sans-serif;font-size:14px;-webkit-fon
     <div class="block fi"><div class="blbl-g">Число души</div><p class="msg-t" id="ds"></p></div>
     <div class="block fi"><div class="blbl-g">Число личности</div><p class="msg-t" id="dp"></p></div>
     <div class="block fi"><div class="blbl-g">Число имени</div><p class="msg-t" id="dn"></p></div>
+    <div style="padding:0 16px 8px"><button class="btn btn-o" onclick="showNumberDeep(document.getElementById('r-d').textContent)">🔮 Что значит моё число?</button></div>
     <div style="padding:0 16px 32px"><button class="btn btn-o" onclick="resetNum()">← Рассчитать снова</button></div>
   </div>
 </div>
@@ -469,6 +471,7 @@ body{color:var(--text);font-family:'Inter',sans-serif;font-size:14px;-webkit-fon
         <div class="attr"><div class="attr-lbl">Цвет</div><div class="attr-val" id="h-lucky-color"></div></div>
       </div>
     </div>
+    <div style="padding:0 16px 8px"><button class="btn btn-o" onclick="showZodiacDeep(document.getElementById('h-name').textContent)">🔮 Что значит мой знак?</button></div>
     <div style="padding:0 16px 32px"><button class="btn btn-o" onclick="resetHoroscope()">← Выбрать другой знак</button></div>
   </div>
 </div>
@@ -808,6 +811,8 @@ function revealCard(){
     document.getElementById('attr-num').textContent=card.n;
     document.getElementById('rev-meaning').innerHTML=`<strong>${rev?'Перевёрнутая':'Прямая'}:</strong> ${rev?card.rev:card.up}`;
     document.getElementById('rev-advice').textContent=rev?card.ar:card.au;
+    const deepBtn=document.getElementById('deep-btn-day');
+if(deepBtn){deepBtn.style.display='block';deepBtn.onclick=function(){showCardDeep(card.name,rev);};}
     revStage.classList.remove('hidden');revStage.style.opacity='0';revStage.style.transition='opacity .5s';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{revStage.style.opacity='1';}));
     const today=new Date().toLocaleDateString('ru-RU');
@@ -2226,7 +2231,7 @@ const DEEP = {
     'Рыбы': `♓ Рыбы — Хранитель Тайн\n\nРыбы плавают между мирами — видимым и невидимым, реальным и воображаемым. Это знак тех, чья душа помнит нечто древнее.\n\nВаша энергия сегодня: чуткая, творческая, мистическая. Вы чувствуете то, что другие не замечают.\n\nТень: растворение в других, потеря себя. Эскапизм как способ избежать реальности. Жертвенность без осознанности.\n\nПодсказка дня: создайте что-то прекрасное — рисунок, текст, музыку, приготовленную с любовью еду. Ваша душа питается через творчество.\n\nСтихия Воды говорит: вы мост между мирами. Берегите себя — мост должен быть прочным.`
   }
 };
- 
+ <script>
 /* ── Попап для толкований ── */
 (function(){
   // Создаём HTML попапа толкований
@@ -2300,5 +2305,6 @@ const DEEP = {
     showDeepModal(signName, text);
   };
 })();
+  <script>
 </body>
 </html>
