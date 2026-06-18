@@ -1,12 +1,13 @@
 import asyncio
+import os
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import (Message, InlineKeyboardMarkup,
                            InlineKeyboardButton, LabeledPrice,
                            PreCheckoutQuery, WebAppInfo)
 from aiogram.filters import CommandStart
 
-BOT_TOKEN  = "8646621947:AAFigPZm257TqMlZ3B7ecpyFK9IJJPF7EKo"
-WEBAPP_URL = "https://5s527njtj2-ship-it.github.io/arcana110"
+BOT_TOKEN  = os.environ.get("BOT_TOKEN")
+WEBAPP_URL = os.environ.get("WEBAPP_URL")
 
 PRICES = {
     "pro":     [LabeledPrice(label="Arcana Pro",     amount=299)],
