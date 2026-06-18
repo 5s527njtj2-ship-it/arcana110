@@ -1335,15 +1335,33 @@ const PROMO_CODES = {
 function applyPromo(){
   const input = document.getElementById('promo-input');
   const code = input.value.trim();
-  if(!code){ toast('Введите промокод'); return; }
+  if(!code){
+    showPromoModal('Введите промокод', false);
+    return;
+  }
   const plan = PROMO_CODES[code];
-  if(!plan){ toast('Промокод не найден'); return; }
+  if(!plan){
+    showPromoModal('Промокод неверен или не существует', false);
+    return;
+  }
   S.plan = plan;
   localStorage.setItem('arc_plan', plan);
   renderSub(); renderProf(); applyLocks();
   if (typeof refreshLocks === 'function') refreshLocks();
   input.value = '';
-  toast('Arcana '+planLbl(plan)+' активирован ✦');
+  showPromoModal('Arcana '+planLbl(plan)+' активирован ✦', true);
+}
+function showPromoModal(message, success){
+  const modal = document.getElementById('promo-modal');
+  const icon = document.getElementById('promo-modal-icon');
+  const text = document.getElementById('promo-modal-text');
+  icon.textContent = success ? '✦' : '✕';
+  icon.style.color = success ? 'var(--gold2)' : 'var(--coral)';
+  text.textContent = message;
+  modal.style.display = 'flex';
+}
+function closePromoModal(){
+  document.getElementById('promo-modal').style.display = 'none';
 }
 /* ═══ INIT ═══ */
 (function(){
@@ -2042,5 +2060,12 @@ function copyDonate(){
   window.dayRev=function(){return isRev;};
 })();
 </script>
+  <div id="promo-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,14,28,.92);backdrop-filter:blur(12px);align-items:center;justify-content:center" onclick="if(event.target===this)closePromoModal()">
+  <div style="background:var(--s1);border:1px solid var(--line2);border-radius:20px;padding:32px 28px;max-width:320px;width:88%;text-align:center;animation:fi .3s var(--ease)">
+    <div id="promo-modal-icon" style="font-size:42px;margin-bottom:14px;color:var(--gold2)">✦</div>
+    <div id="promo-modal-text" style="font-size:15px;line-height:1.6;color:var(--text);font-weight:500;margin-bottom:22px"></div>
+    <button onclick="closePromoModal()" style="width:100%;background:linear-gradient(135deg,#4B5EFF,#7B2FBE);color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer">OK</button>
+  </div>
+</div>
 </body>
 </html>
