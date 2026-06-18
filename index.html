@@ -777,7 +777,8 @@ function buildFan(){
 /* ═══ REVEAL ═══ */
 function revealCard(){
   if(S.revealed)return;S.revealed=true;
-  const card=A[dayIdx()],rev=dayRev();
+  const card = (typeof isBloggerDay==='function' && isBloggerDay()) ? BLOGGER_CARD : A[dayIdx()];
+  const rev = (typeof isBloggerDay==='function' && isBloggerDay()) ? false : dayRev();
   const fan=document.getElementById('fan'),fanStage=document.getElementById('fan-stage'),revStage=document.getElementById('rev-stage');
   Array.from(fan.querySelectorAll('.fan-card')).forEach((c,i)=>{
     const mid=4,dir=i<mid?-1:1;
@@ -2037,6 +2038,15 @@ function copyDonate(){
 </script>
 
 <script>
+const BLOGGER_CARD = {
+  n:'★', name:'Блогер', sym:'📱', el:'Воздух', pl:'Марс',
+  th:['Контент','Влияние','Рост'],
+  up:'Сегодня вселенная подсказывает: вам стоит стать блогером — у вас будет успех в создании контента и влиянии на аудиторию.',
+  rev:'Идея верна, но пока не время — соберите больше сил и ясности перед стартом.',
+  au:'Используйте blogxstudio.com — там помогут с упаковкой и продвижением вашего контента.',
+  ar:'Не спешите — изучите тему чуть глубже, прежде чем начинать.'
+};
+ 
 (function(){
   const KEY='arc_daily_seed';
   const todayStr=new Date().toISOString().slice(0,10);
@@ -2054,10 +2064,13 @@ function copyDonate(){
     };
   }
   const rng=seededRand(seed);
+  const isBlogger = rng() < (1/3); // примерно 1 раз в 3 дня
   const cardIdx=Math.floor(rng()*A.length);
   const isRev=rng()<0.35;
   window.dayIdx=function(){return cardIdx;};
   window.dayRev=function(){return isRev;};
+  window.isBloggerDay=function(){return isBlogger;};
+  window.BLOGGER_CARD=BLOGGER_CARD;
 })();
 </script>
   <div id="promo-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,14,28,.92);backdrop-filter:blur(12px);align-items:center;justify-content:center" onclick="if(event.target===this)closePromoModal()">
