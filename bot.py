@@ -55,6 +55,18 @@ DESCRIPTIONS = {
 bot = Bot(token=BOT_TOKEN)
 dp  = Dispatcher()
 
+async def send_donate_message(chat_id: int):
+    kb = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="✦ Поддержать Arcana", callback_data="show_donate")
+    ]])
+    await bot.send_message(
+        chat_id,
+        "🌙 *Поддержать Arcana*\n\n"
+        "Если приложение резонирует с вами — вы можете поддержать его развитие.",
+        parse_mode="Markdown",
+        reply_markup=kb
+    )
+
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
     kb = InlineKeyboardMarkup(inline_keyboard=[[
@@ -68,6 +80,7 @@ async def cmd_start(message: Message):
         parse_mode="Markdown",
         reply_markup=kb
     )
+    await send_donate_message(message.chat.id)
 
 @dp.message(Command("donate"))
 async def cmd_donate(message: Message):
@@ -79,6 +92,18 @@ async def cmd_donate(message: Message):
         f"После перевода пришлите сюда скриншот транзакции, и мы вышлем вам промокод на Arcana Premium.",
         parse_mode="Markdown"
     )
+
+@dp.callback_query(F.data == "show_donate")
+async def callback_show_donate(callback):
+    await callback.message.answer(
+        f"🌙 *Поддержать Arcana*\n\n"
+        f"Если приложение резонирует с вами — вы можете поддержать его развитие.\n\n"
+        f"*TRC20 · USDT / TRX*\n`{DONATE_ADDRESS}`\n\n"
+        f"Спасибо — каждый вклад помогает делать Arcana глубже и точнее ✦\n\n"
+        f"После перевода пришлите сюда скриншот транзакции, и мы вышлем вам промокод на Arcana Premium.",
+        parse_mode="Markdown"
+    )
+    await callback.answer()
 
 @dp.message(F.photo)
 async def handle_donate_screenshot(message: Message):
