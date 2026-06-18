@@ -1,0 +1,1993 @@
+<hide
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Arcana</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0D0E1C;--s1:#13142A;--s2:#1A1C35;--s3:#22254A;
+  --accent:#4B5EFF;--accent2:#7B8FFF;
+  --gold:#C8A96E;--gold2:#E2C88A;
+  --coral:#FF6B5A;--teal:#4ECDC4;
+  --text:#F0F0FA;--dim:#6868A0;
+  --line:rgba(255,255,255,0.07);--line2:rgba(255,255,255,0.13);
+  --r:18px;--ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#0D0E1C}
+body{color:var(--text);font-family:'Inter',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;overflow:hidden}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+#content::-webkit-scrollbar{display:none}
+
+/* NAV */
+#nav{display:flex;background:rgba(13,14,28,.96);backdrop-filter:blur(20px);border-top:1px solid var(--line);padding:10px 0 max(14px,env(safe-area-inset-bottom));flex-shrink:0}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:2px 0;background:none;border:none;color:var(--dim);font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:color .2s;-webkit-tap-highlight-color:transparent}
+.ni.active{color:var(--accent2)}
+.ni svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.ni.active svg{transform:scale(1.1)}
+.ni-pip{width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .2s}
+.ni.active .ni-pip{opacity:1}
+
+/* PAGES */
+.page{display:none;min-height:100%}.page.active{display:block}
+
+/* COMMON */
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.block{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin:0 16px 12px}
+.blbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+.blbl-a{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:14px}
+.blbl-g{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:var(--dim);font-weight:600;letter-spacing:.5px;margin-bottom:6px;text-transform:uppercase}
+.field input,.field select{width:100%;background:var(--s2);border:1px solid var(--line);border-radius:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;padding:13px 16px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:rgba(75,94,255,.5);background:rgba(75,94,255,.04)}
+.field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.35)}
+.field select option{background:var(--s2);color:var(--text)}
+.btn{display:block;width:100%;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:15px;cursor:pointer;transition:opacity .15s,transform .1s;-webkit-tap-highlight-color:transparent;letter-spacing:.3px}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn-a{background:linear-gradient(135deg,#4B5EFF,#7B2FBE);color:#fff;box-shadow:0 8px 24px rgba(75,94,255,.3)}
+.btn-g{background:linear-gradient(135deg,#B8922A,#E2C88A);color:#0E0F1A;box-shadow:0 8px 24px rgba(200,169,110,.25)}
+.btn-o{background:none;color:var(--text);border:1px solid var(--line2)}
+.sep{height:1px;background:var(--line);margin:16px 0}
+.msg-t{font-size:14px;line-height:1.8;color:rgba(240,240,250,.75)}
+.msg-t strong{color:var(--text);font-weight:600}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
+.tag{font-size:11px;color:var(--dim);font-weight:500;border:1px solid var(--line2);border-radius:20px;padding:5px 14px;letter-spacing:.3px;background:rgba(255,255,255,.03)}
+.fi{animation:fi .4s var(--ease) both}
+@keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.hidden{display:none!important}
+
+/* LOCK OVERLAY */
+.lock-overlay{
+  position:absolute;inset:0;z-index:10;
+  background:rgba(13,14,28,.88);
+  backdrop-filter:blur(6px);
+  border-radius:inherit;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:20px;text-align:center;cursor:pointer;
+}
+.lock-icon{font-size:32px;margin-bottom:4px}
+.lock-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500}
+.lock-sub{font-size:12px;color:var(--dim);line-height:1.5}
+.lock-btn{margin-top:4px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;padding:10px 24px;cursor:pointer}
+
+/* ══ TAROT HERO ══ */
+.tarot-hero{position:relative;height:300px;overflow:hidden;flex-shrink:0}
+.hero-sky{position:absolute;inset:0;background:linear-gradient(170deg,#6B3FA0 0%,#3D3580 35%,#1A1C50 65%,#0D0E1C 100%)}
+.hero-arc{position:absolute;bottom:-80px;left:50%;transform:translateX(-50%);width:340px;height:340px;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,rgba(255,210,100,.06) 0%,transparent 65%);border:1px solid rgba(255,255,255,.06)}
+.hero-stars{position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 10% 15%,rgba(255,255,255,.9) 0%,transparent 100%),radial-gradient(1px 1px at 85% 10%,rgba(255,255,255,.7) 0%,transparent 100%),radial-gradient(2px 2px at 55% 22%,rgba(200,169,110,.8) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 92% 38%,rgba(123,143,255,.9) 0%,transparent 100%),radial-gradient(1px 1px at 40% 8%,rgba(255,255,255,.6) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 18% 70%,rgba(255,255,255,.4) 0%,transparent 100%)}
+.hero-moon{position:absolute;top:24px;right:30px;width:52px;height:52px;border-radius:50%;border:2px solid rgba(200,169,110,.5);box-shadow:inset -14px 0 0 rgba(200,169,110,.15)}
+.hero-card-float{position:absolute;border-radius:10px;border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 24px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:18px;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:rotate(var(--r,0deg)) translateY(0)}50%{transform:rotate(var(--r,0deg)) translateY(-8px)}}
+.hero-fade{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,var(--bg) 0%,transparent 100%)}
+.hero-bottom{position:absolute;bottom:0;left:0;right:0;padding:0 24px 20px}
+.hero-date-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 12px;font-size:12px;color:rgba(255,255,255,.7);margin-bottom:8px;font-weight:500}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;line-height:1.05;letter-spacing:-.3px}
+.hero-title em{font-style:italic;color:var(--gold2)}
+
+/* SPREAD TABS */
+.spread-bar{display:flex;gap:8px;padding:16px 16px 8px;overflow-x:auto}
+.spread-bar::-webkit-scrollbar{display:none}
+.sptab{flex-shrink:0;padding:11px 14px;background:var(--s1);border:1px solid transparent;border-radius:12px;color:var(--dim);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.3px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.sptab.active{background:var(--s2);border-color:rgba(75,94,255,.4);color:var(--accent2)}
+
+/* FAN DECK */
+.fan-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 20px}
+.fan-hint{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:10px;margin-bottom:20px;font-weight:500;letter-spacing:.3px}
+.fan-hint::before,.fan-hint::after{content:'';width:32px;height:1px;background:var(--line2)}
+.fan{position:relative;width:300px;height:180px;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-bottom:4px}
+.fan-card{position:absolute;width:76px;height:116px;bottom:0;left:50%;margin-left:-38px;transform-origin:bottom center;border-radius:10px;overflow:hidden;transition:transform .5s var(--ease),filter .3s;cursor:pointer}
+.fan-card-inner{position:absolute;inset:0;background:linear-gradient(145deg,#2D3580 0%,#1A1C50 50%,#151840 100%);border:1px solid rgba(123,143,255,.35);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.fan-card-inner::before{content:'';position:absolute;inset:5px;border:1px solid rgba(123,143,255,.2);border-radius:6px}
+.fan-card-inner::after{content:'✦';font-size:24px;color:rgba(123,143,255,.3);text-shadow:0 0 15px rgba(123,143,255,.5)}
+.fan-card-stripe{position:absolute;top:0;left:0;right:0;height:6px;border-radius:10px 10px 0 0}
+.fan:hover .fan-card{filter:brightness(1.15)}
+
+/* REVEALED CARD */
+.rev-card-outer{display:flex;flex-direction:column;align-items:center;margin-bottom:16px}
+.rev-card{width:170px;height:262px;border-radius:20px;position:relative;overflow:hidden;flex-shrink:0;box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 1px rgba(200,169,110,.3),0 0 60px rgba(75,94,255,.15)}
+.rev-card-art{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.rev-card-sym{font-size:80px;line-height:1;position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);z-index:2;filter:drop-shadow(0 4px 20px rgba(0,0,0,.4))}
+.rev-card-frame{position:absolute;inset:8px;border:1px solid rgba(255,255,255,.15);border-radius:14px;pointer-events:none;z-index:3}
+.rev-card-frame::before{content:'';position:absolute;inset:4px;border:1px solid rgba(255,255,255,.06);border-radius:10px}
+.rev-card-corner{position:absolute;font-size:9px;color:rgba(255,255,255,.5);letter-spacing:1px;z-index:4}
+.rev-card-corner.tl{top:16px;left:16px}
+.rev-card-corner.br{bottom:48px;right:16px;transform:rotate(180deg)}
+.rev-card-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.85) 0%,transparent 100%);padding:20px 16px 16px;text-align:center;z-index:5}
+.rev-card-roman{font-family:'Cormorant Garamond',serif;font-size:10px;letter-spacing:3px;color:rgba(200,169,110,.8);display:block;margin-bottom:3px;text-transform:uppercase}
+.rev-card-cname{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:rgba(255,255,255,.9)}
+.orient-badge{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.orient-badge.up{background:rgba(75,94,255,.15);color:var(--accent2);border:1px solid rgba(75,94,255,.25)}
+.orient-badge.rev{background:rgba(255,107,90,.1);color:var(--coral);border:1px solid rgba(255,107,90,.2)}
+.rev-name{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;text-align:center;margin-top:14px;letter-spacing:-.3px}
+.attr-row{display:flex;gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:16px;background:var(--s1)}
+.attr{flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--line)}
+.attr:last-child{border-right:none}
+.attr-lbl{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;font-weight:600}
+.attr-val{font-size:13px;font-weight:600;color:var(--text)}
+.msg-block{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:12px}
+.msg-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.msg-lbl.a{color:var(--accent2)}.msg-lbl.g{color:var(--gold)}
+
+/* THREE SPREAD */
+.t3-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 16px 0}
+.t3slot{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.t3card{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:18px 6px;text-align:center;transition:all .2s;margin-bottom:6px;position:relative;overflow:hidden}
+.t3slot.sel .t3card{border-color:rgba(75,94,255,.5);background:var(--s2);box-shadow:0 8px 24px rgba(75,94,255,.12)}
+.t3sym{font-size:34px;margin-bottom:8px;line-height:1}
+.t3n{font-size:10px;color:var(--dim);line-height:1.4;font-weight:500}
+.t3lbl{text-align:center;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);opacity:.5;margin-top:4px;font-weight:600}
+
+/* CELTIC CROSS */
+.celtic-wrap{padding:16px;position:relative}
+.celtic-grid{
+  display:grid;
+  grid-template-areas:
+    ". top . . ."
+    "left center cross right ."
+    ". bot . . ."
+    ". . . s4 s1"
+    ". . . s3 s2";
+  grid-template-columns:1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows:auto auto auto auto auto;
+  gap:8px;
+  max-width:320px;margin:0 auto;
+}
+.cc-pos{cursor:pointer;-webkit-tap-highlight-color:transparent;text-align:center}
+.cc-card{background:var(--s1);border:1px solid var(--line);border-radius:10px;padding:10px 4px;transition:all .2s;margin-bottom:4px;font-size:22px;min-height:60px;display:flex;align-items:center;justify-content:center}
+.cc-pos.sel .cc-card{border-color:rgba(75,94,255,.5);background:var(--s2)}
+.cc-pos[data-pos=cross] .cc-card{opacity:.7;transform:rotate(90deg)}
+.cc-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:600}
+
+/* NUMEROLOGY */
+.num-hero{padding:52px 24px 28px;background:linear-gradient(160deg,#1A1240 0%,var(--bg) 70%);margin-bottom:4px;position:relative;overflow:hidden}
+.num-hero::after{content:'7';position:absolute;right:20px;top:40px;font-family:'Cormorant Garamond',serif;font-size:120px;font-weight:300;color:rgba(75,94,255,.06);line-height:1}
+.ng{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 12px}
+.nc{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:20px 14px;text-align:center;position:relative;overflow:hidden}
+.nbig{font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:300;line-height:1;color:var(--gold2);margin-bottom:5px;position:relative}
+.nlbl{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);line-height:1.5;font-weight:600}
+
+/* MATRIX */
+.matrix-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;margin:0 16px 12px}
+.matrix-cell{background:var(--s1);border:1px solid var(--line);border-radius:8px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--gold);position:relative}
+.matrix-cell.active{border-color:rgba(75,94,255,.5);background:var(--s2)}
+.matrix-cell .mc-lbl{position:absolute;bottom:2px;font-size:7px;color:var(--dim);letter-spacing:.5px}
+
+/* HOROSCOPE */
+.zodiac-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 16px 12px}
+.zod-card{background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .2s}
+.zod-card.active{border-color:rgba(75,94,255,.4);background:var(--s2)}
+.zod-sym{font-size:26px;margin-bottom:4px}
+.zod-name{font-size:10px;color:var(--dim);font-weight:600;letter-spacing:.3px}
+.horoscope-block{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin:0 16px 12px}
+.horoscope-hero{text-align:center;margin-bottom:16px}
+.horoscope-sym{font-size:60px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(75,94,255,.4))}
+.horoscope-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;margin-bottom:2px}
+.horoscope-dates{font-size:12px;color:var(--dim);font-weight:500}
+
+/* COMPATIBILITY */
+.compat-result{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin:0 16px 12px;text-align:center}
+.compat-score{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;line-height:1;margin-bottom:4px}
+.compat-bar{height:6px;background:var(--line);border-radius:3px;margin:12px 0;overflow:hidden}
+.compat-fill{height:100%;border-radius:3px;transition:width 1s var(--ease)}
+.compat-label{font-size:13px;font-weight:600;margin-bottom:8px}
+.compat-desc{font-size:13px;color:var(--dim);line-height:1.7}
+
+/* HISTORY */
+.hist-item{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s}
+.hist-item:last-child{border-bottom:none}
+.hist-item:active{background:var(--s2)}
+.hist-sym{font-size:32px;width:44px;text-align:center}
+.hist-info{flex:1}
+.hist-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:2px}
+.hist-date{font-size:11px;color:var(--dim);font-weight:500}
+.hist-pos{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:.3px}
+.hist-pos.up{background:rgba(75,94,255,.15);color:var(--accent2)}
+.hist-pos.rv{background:rgba(255,107,90,.1);color:var(--coral)}
+
+/* PROFILE */
+.prof-hero{background:linear-gradient(160deg,#1a1440 0%,#0D0E1C 70%);padding:52px 24px 28px;position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.prof-av-row{display:flex;align-items:center;gap:18px;margin-bottom:16px}
+.av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#3D2F80,#1A1C50);border:2px solid rgba(200,169,110,.3);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.av-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;margin-bottom:4px}
+.av-plan{font-size:12px;color:var(--dim);font-weight:500}
+.av-plan span{color:var(--accent2);font-weight:600}
+.stats-r{display:flex;gap:0;margin:16px 16px 12px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--s1)}
+.sc{flex:1;padding:18px 10px;text-align:center;border-right:1px solid var(--line)}
+.sc:last-child{border-right:none}
+.sn{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--accent2)}
+.sl{font-size:10px;color:var(--dim);margin-top:3px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.menu-block{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin:0 16px 12px}
+.mi{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent}
+.mi:last-child{border-bottom:none}
+.mi:active{background:var(--s2)}
+.mi-l{display:flex;align-items:center;gap:14px}
+.mi-ic{width:40px;height:40px;background:var(--s2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid var(--line);flex-shrink:0}
+.mi-t{font-size:14px;font-weight:600;margin-bottom:2px}
+.mi-s{font-size:11px;color:var(--dim)}
+.mi-badge{font-size:10px;background:rgba(75,94,255,.15);color:var(--accent2);border-radius:4px;padding:2px 8px;font-weight:700;margin-left:8px}
+.mi-soon{font-size:10px;background:rgba(255,255,255,.06);color:var(--dim);border-radius:4px;padding:2px 8px;font-weight:600}
+.mi-chevron{color:var(--dim);font-size:18px;opacity:.5}
+
+/* SUBSCRIPTION */
+.sub-hero{padding:52px 24px 24px;background:linear-gradient(160deg,#0F1035 0%,var(--bg) 100%);margin-bottom:4px;position:relative;overflow:hidden}
+.sub-hero::after{content:'♦';position:absolute;right:20px;top:48px;font-size:100px;color:rgba(75,94,255,.04)}
+.plan-c{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:24px 20px;margin:0 16px 12px;position:relative;overflow:hidden}
+.plan-c.feat{border-color:rgba(75,94,255,.5);background:linear-gradient(160deg,rgba(75,94,255,.06) 0%,var(--s1) 60%)}
+.plan-c.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.plan-badge{position:absolute;top:16px;right:20px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:4px 12px;border-radius:20px}
+.plan-nm{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;margin-bottom:6px}
+.plan-pr{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:300;color:var(--gold);line-height:1;margin-bottom:4px}
+.plan-pr span{font-size:16px;color:var(--dim);font-family:'Inter',sans-serif;font-weight:400}
+.plan-sub{font-size:12px;color:var(--dim);margin-bottom:20px;line-height:1.6;font-weight:500}
+.plan-feats{list-style:none;margin-bottom:20px}
+.plan-feats li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--dim);padding:7px 0;border-bottom:1px solid var(--line);line-height:1.4;font-weight:500}
+.plan-feats li:last-child{border-bottom:none}
+.plan-feats li .fd{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:5px}
+.plan-feats li.off .fd{background:var(--line2)}
+.plan-feats li.off{opacity:.3}
+.curr-b{display:inline-flex;align-items:center;gap:6px;background:rgba(75,94,255,.1);border:1px solid rgba(75,94,255,.25);border-radius:8px;color:var(--accent2);font-size:11px;padding:6px 14px;margin-bottom:14px;font-weight:700;letter-spacing:.3px}
+.curr-b.gold{background:rgba(200,169,110,.1);border-color:rgba(200,169,110,.25);color:var(--gold2)}
+
+/* TOAST */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s3);border:1px solid var(--line2);border-radius:12px;color:var(--text);font-size:13px;font-weight:600;padding:11px 20px;opacity:0;transition:opacity .25s,transform .25s;z-index:999;white-space:nowrap;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes shimmer{0%{transform:translateX(-100%) rotate(20deg)}100%{transform:translateX(250%) rotate(20deg)}}
+.card-shimmer::after{content:'';position:absolute;top:0;left:0;width:35%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);animation:shimmer 3s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="content">
+
+<!-- ══ TAROT ══ -->
+<div class="page active" id="page-tarot">
+  <div class="tarot-hero">
+    <div class="hero-sky"></div><div class="hero-arc"></div><div class="hero-stars"></div><div class="hero-moon"></div>
+    <div style="position:absolute;inset:0;pointer-events:none">
+      <div class="hero-card-float" style="top:44px;left:40px;width:50px;height:76px;background:linear-gradient(140deg,#FF6B5A,#C8344D);--r:-20deg">⚡</div>
+      <div class="hero-card-float" style="top:36px;right:36px;width:46px;height:70px;background:linear-gradient(140deg,#4B5EFF,#7B2FBE);--r:16deg">🌙</div>
+      <div class="hero-card-float" style="top:88px;left:72px;width:42px;height:64px;background:linear-gradient(140deg,#C8A96E,#8B6914);--r:6deg">⭐</div>
+    </div>
+    <div class="hero-fade"></div>
+    <div class="hero-bottom">
+      <div class="hero-date-badge">✦ <span id="hero-date"></span></div>
+      <div class="hero-title">Карта <em>дня</em></div>
+    </div>
+  </div>
+
+  <div class="spread-bar">
+    <button class="sptab active" onclick="setSpread('day',this)">Карта дня</button>
+    <button class="sptab" onclick="setSpread('three',this)">Три карты</button>
+    <button class="sptab" onclick="setSpread('celtic',this)">Кельтский крест</button>
+  </div>
+
+  <!-- DAY -->
+  <div id="sp-day">
+    <div id="fan-stage" class="fan-wrap">
+      <div class="fan-hint">Нажмите на колоду</div>
+      <div class="fan" id="fan" onclick="revealCard()"></div>
+    </div>
+    <div id="rev-stage" class="hidden" style="padding:0 20px 32px">
+      <div class="rev-card-outer">
+        <div class="rev-card card-shimmer" id="rev-card">
+          <div class="rev-card-art" id="rev-art"></div>
+          <div class="rev-card-sym" id="rev-sym"></div>
+          <div class="rev-card-frame"></div>
+          <div class="rev-card-corner tl" id="rev-tl"></div>
+          <div class="rev-card-corner br" id="rev-br"></div>
+          <div class="rev-card-label"><span class="rev-card-roman" id="rev-roman"></span><span class="rev-card-cname" id="rev-cname"></span></div>
+        </div>
+        <div class="rev-name fi" id="rev-name"></div>
+        <div class="fi"><span class="orient-badge" id="rev-orient"></span></div>
+        <div class="tag-row fi" id="rev-tags"></div>
+      </div>
+      <div class="attr-row fi">
+        <div class="attr"><div class="attr-lbl">Стихия</div><div class="attr-val" id="attr-el"></div></div>
+        <div class="attr"><div class="attr-lbl">Планета</div><div class="attr-val" id="attr-pl"></div></div>
+        <div class="attr"><div class="attr-lbl">Арканы</div><div class="attr-val" id="attr-ar"></div></div>
+        <div class="attr"><div class="attr-lbl">Число</div><div class="attr-val" id="attr-num"></div></div>
+      </div>
+      <div class="msg-block fi"><div class="msg-lbl a">Послание дня</div><p class="msg-t" id="rev-meaning"></p><div class="sep"></div><div class="msg-lbl g">Совет</div><p class="msg-t" id="rev-advice"></p></div>
+    </div>
+  </div>
+
+  <!-- THREE -->
+  <div id="sp-three" class="hidden" style="position:relative">
+    <div id="sp-three-lock" class="lock-overlay" onclick="goTab('subscription')">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title">Расклад «Три карты»</div>
+      <div class="lock-sub">Доступно в тарифе Arcana Pro и выше</div>
+      <button class="lock-btn">Открыть доступ</button>
+    </div>
+    <div id="t3content">
+      <div class="t3-grid" id="t3grid"></div>
+      <div id="t3detail" class="hidden">
+        <div class="msg-block fi" style="margin:8px 16px 0">
+          <div class="msg-lbl g" id="t3pos-lbl"></div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+            <div style="font-size:44px;line-height:1" id="t3sym-big"></div>
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;margin-bottom:4px" id="t3name-big"></div><span class="orient-badge" id="t3pos-badge" style="font-size:10px;padding:3px 10px"></span></div>
+          </div>
+          <div class="tag-row" id="t3tags" style="justify-content:flex-start;margin-bottom:14px"></div>
+          <p class="msg-t" id="t3meaning"></p><div class="sep"></div><div class="msg-lbl a">Совет</div><p class="msg-t" id="t3advice"></p>
+        </div>
+      </div>
+      <div style="height:32px"></div>
+    </div>
+  </div>
+
+  <!-- CELTIC CROSS -->
+  <div id="sp-celtic" class="hidden">
+    <div id="celtic-content">
+      <p style="text-align:center;font-size:12px;color:var(--dim);padding:12px 20px 4px;font-weight:500">Нажмите на позицию для раскрытия значения</p>
+      <div class="celtic-wrap">
+        <div class="celtic-grid" id="celtic-grid"></div>
+      </div>
+      <div id="celtic-detail" class="hidden">
+        <div class="msg-block fi" style="margin:0 16px">
+          <div class="msg-lbl g" id="cc-pos-lbl"></div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+            <div style="font-size:40px" id="cc-sym-big"></div>
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;margin-bottom:4px" id="cc-name-big"></div><span class="orient-badge" id="cc-badge"></span></div>
+          </div>
+          <div class="tag-row" id="cc-tags" style="justify-content:flex-start;margin-bottom:14px"></div>
+          <p class="msg-t" id="cc-meaning"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NUMEROLOGY ══ -->
+<div class="page" id="page-numerology">
+  <div class="num-hero">
+    <div class="eyebrow">Числовой код</div>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;line-height:1.05;margin-bottom:8px"><em style="font-style:italic;color:var(--gold2)">Нумерология</em></h1>
+    <p style="font-size:13px;color:var(--dim);font-weight:500;line-height:1.6">Расшифруйте числовой код вашей судьбы</p>
+  </div>
+  <div id="nform" style="padding-top:4px">
+    <div class="block">
+      <div class="blbl">Ваши данные</div>
+      <div class="field"><label>Дата рождения</label><input type="date" id="bdate"/></div>
+      <div class="field" style="margin-bottom:16px"><label>Полное имя по-русски</label><input type="text" id="fname" placeholder="Мария Иванова"/></div>
+      <button class="btn btn-a" onclick="calcNum()">Рассчитать числа ✦</button>
+    </div>
+    <div class="block" style="background:rgba(75,94,255,.04);border-color:rgba(75,94,255,.15)">
+      <div class="blbl-a">Что рассчитывается</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:flex-start"><span style="color:var(--accent2);margin-top:1px">✦</span>Число судьбы</div>
+        <div style="font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:flex-start"><span style="color:var(--accent2);margin-top:1px">✦</span>Число души</div>
+        <div style="font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:flex-start"><span style="color:var(--accent2);margin-top:1px">✦</span>Число личности</div>
+        <div style="font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:flex-start"><span style="color:var(--accent2);margin-top:1px">✦</span>Число имени</div>
+        <div style="font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:flex-start"><span style="color:var(--accent2);margin-top:1px">✦</span>Жизненный путь</div>
+        <div style="font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:flex-start"><span style="color:var(--accent2);margin-top:1px">✦</span>Число зрелости</div>
+      </div>
+    </div>
+  </div>
+  <div id="nresult" class="hidden" style="padding-top:4px">
+    <div class="ng">
+      <div class="nc"><div class="nbig" id="r-d">—</div><div class="nlbl">Число<br>судьбы</div></div>
+      <div class="nc"><div class="nbig" id="r-s">—</div><div class="nlbl">Число<br>души</div></div>
+      <div class="nc"><div class="nbig" id="r-p">—</div><div class="nlbl">Число<br>личности</div></div>
+      <div class="nc"><div class="nbig" id="r-n">—</div><div class="nlbl">Число<br>имени</div></div>
+      <div class="nc"><div class="nbig" id="r-lp">—</div><div class="nlbl">Жизненный<br>путь</div></div>
+      <div class="nc"><div class="nbig" id="r-m">—</div><div class="nlbl">Число<br>зрелости</div></div>
+    </div>
+
+    <!-- MATRIX unlockable -->
+    <div style="margin:0 16px 12px;position:relative;border-radius:var(--r);overflow:hidden">
+      <div id="matrix-lock-overlay" class="lock-overlay" onclick="goTab('subscription')">
+        <div class="lock-icon">🔒</div><div class="lock-title">Матрица судьбы</div>
+        <div class="lock-sub">Доступно в тарифе Arcana Pro</div><button class="lock-btn">Открыть</button>
+      </div>
+      <div class="block" style="margin:0">
+        <div class="blbl-a">Матрица судьбы — Пифагорейский квадрат</div>
+        <div class="matrix-grid" id="matrix-grid"></div>
+      </div>
+    </div>
+
+    <div class="block fi"><div class="blbl-g">Число судьбы</div><p class="msg-t" id="dd"></p></div>
+    <div class="block fi"><div class="blbl-g">Число души</div><p class="msg-t" id="ds"></p></div>
+    <div class="block fi"><div class="blbl-g">Число личности</div><p class="msg-t" id="dp"></p></div>
+    <div class="block fi"><div class="blbl-g">Число имени</div><p class="msg-t" id="dn"></p></div>
+    <div style="padding:0 16px 32px"><button class="btn btn-o" onclick="resetNum()">← Рассчитать снова</button></div>
+  </div>
+</div>
+
+<!-- ══ HOROSCOPE ══ -->
+<div class="page" id="page-horoscope">
+  <div class="num-hero" style="background:linear-gradient(160deg,#1A1235 0%,var(--bg) 70%)">
+    <div class="eyebrow">Звёздный путь</div>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;line-height:1.05;margin-bottom:8px"><em style="font-style:italic;color:var(--gold2)">Гороскоп</em></h1>
+    <p style="font-size:13px;color:var(--dim);font-weight:500">Персональное предсказание на сегодня</p>
+  </div>
+
+  <div id="horoscope-lock-wrap" style="margin:0 16px 12px;position:relative;border-radius:var(--r);overflow:hidden">
+    <div id="horoscope-lock" class="lock-overlay" onclick="goTab('subscription')">
+      <div class="lock-icon">🔒</div><div class="lock-title">Персональный гороскоп</div>
+      <div class="lock-sub">Доступно в тарифе Arcana Premium</div><button class="lock-btn">Открыть</button>
+    </div>
+    <div class="block" style="margin:0" id="horoscope-content">
+      <div class="blbl-a">Выберите знак или введите дату</div>
+      <div class="field"><label>Дата рождения</label><input type="date" id="horo-bdate" oninput="updateZodiac()"/></div>
+      <div id="zodiac-detected" style="display:none;text-align:center;padding:8px 0 16px">
+        <div style="font-size:40px" id="zodiac-auto-sym"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500" id="zodiac-auto-name"></div>
+      </div>
+      <div class="zodiac-grid" id="zodiac-grid"></div>
+      <button class="btn btn-a" style="margin-top:16px" onclick="showHoroscope()">Получить предсказание ✦</button>
+    </div>
+  </div>
+
+  <div id="horoscope-result" class="hidden">
+    <div class="horoscope-block fi">
+      <div class="horoscope-hero">
+        <div class="horoscope-sym" id="h-sym"></div>
+        <div class="horoscope-name" id="h-name"></div>
+        <div class="horoscope-dates" id="h-dates"></div>
+      </div>
+      <div class="sep"></div>
+      <div class="blbl-a">Предсказание на сегодня</div>
+      <p class="msg-t" id="h-day"></p>
+      <div class="sep"></div>
+      <div class="blbl-g">Любовь</div><p class="msg-t" id="h-love"></p>
+      <div class="sep"></div>
+      <div class="blbl-g">Карьера</div><p class="msg-t" id="h-career"></p>
+      <div class="sep"></div>
+      <div class="blbl-g">Здоровье</div><p class="msg-t" id="h-health"></p>
+      <div class="sep"></div>
+      <div style="display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:4px">
+        <div class="attr"><div class="attr-lbl">Удачный день</div><div class="attr-val" id="h-lucky-day"></div></div>
+        <div class="attr"><div class="attr-lbl">Число</div><div class="attr-val" id="h-lucky-num"></div></div>
+        <div class="attr"><div class="attr-lbl">Цвет</div><div class="attr-val" id="h-lucky-color"></div></div>
+      </div>
+    </div>
+    <div style="padding:0 16px 32px"><button class="btn btn-o" onclick="resetHoroscope()">← Выбрать другой знак</button></div>
+  </div>
+</div>
+
+<!-- ══ COMPATIBILITY ══ -->
+<div class="page" id="page-compat">
+  <div class="num-hero" style="background:linear-gradient(160deg,#1A1530 0%,var(--bg) 70%)">
+    <div class="eyebrow">Союз чисел</div>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;line-height:1.05;margin-bottom:8px"><em style="font-style:italic;color:var(--gold2)">Совместимость</em></h1>
+    <p style="font-size:13px;color:var(--dim);font-weight:500">Числовая совместимость двух людей</p>
+  </div>
+
+  <div style="margin:0 16px 12px;position:relative;border-radius:var(--r);overflow:hidden">
+    <div id="compat-lock" class="lock-overlay" onclick="goTab('subscription')">
+      <div class="lock-icon">🔒</div><div class="lock-title">Совместимость по числам</div>
+      <div class="lock-sub">Доступно в тарифе Arcana Premium</div><button class="lock-btn">Открыть</button>
+    </div>
+    <div class="block" style="margin:0">
+      <div class="blbl">Первый человек</div>
+      <div class="field"><label>Дата рождения</label><input type="date" id="c-date1"/></div>
+      <div class="field" style="margin-bottom:20px"><label>Имя</label><input type="text" id="c-name1" placeholder="Имя по-русски"/></div>
+      <div class="blbl">Второй человек</div>
+      <div class="field"><label>Дата рождения</label><input type="date" id="c-date2"/></div>
+      <div class="field" style="margin-bottom:16px"><label>Имя</label><input type="text" id="c-name2" placeholder="Имя по-русски"/></div>
+      <button class="btn btn-a" onclick="calcCompat()">Рассчитать совместимость</button>
+    </div>
+  </div>
+
+  <div id="compat-result" class="hidden">
+    <div class="compat-result fi">
+      <div style="font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Числовая совместимость</div>
+      <div class="compat-score" id="c-score" style="color:var(--gold2)"></div>
+      <div class="compat-bar"><div class="compat-fill" id="c-bar"></div></div>
+      <div class="compat-label" id="c-label"></div>
+      <p class="compat-desc" id="c-desc"></p>
+    </div>
+    <div class="block fi">
+      <div class="blbl-g">Числа судьбы</div>
+      <div style="display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px">
+        <div class="attr"><div class="attr-lbl" id="c-n1-lbl">Человек 1</div><div class="attr-val" id="c-num1" style="font-size:28px;font-family:'Cormorant Garamond',serif;font-weight:300;color:var(--gold)"></div></div>
+        <div class="attr"><div class="attr-lbl" id="c-n2-lbl">Человек 2</div><div class="attr-val" id="c-num2" style="font-size:28px;font-family:'Cormorant Garamond',serif;font-weight:300;color:var(--gold)"></div></div>
+        <div class="attr"><div class="attr-lbl">Совместно</div><div class="attr-val" id="c-num-joint" style="font-size:28px;font-family:'Cormorant Garamond',serif;font-weight:300;color:var(--accent2)"></div></div>
+      </div>
+      <p class="msg-t" id="c-detail"></p>
+    </div>
+    <div style="padding:0 16px 32px"><button class="btn btn-o" onclick="resetCompat()">← Рассчитать снова</button></div>
+  </div>
+</div>
+
+<!-- ══ PROFILE ══ -->
+<div class="page" id="page-profile">
+  <div class="prof-hero">
+    <div class="prof-av-row">
+      <div class="av">🌙</div>
+      <div><div class="av-name" id="p-name">Гость</div><div class="av-plan">Тариф: <span id="p-plan">Базовый</span></div></div>
+    </div>
+  </div>
+  <div class="stats-r">
+    <div class="sc"><div class="sn" id="st-d">0</div><div class="sl">Дней</div></div>
+    <div class="sc"><div class="sn" id="st-c">0</div><div class="sl">Карт</div></div>
+    <div class="sc"><div class="sn" id="st-n">0</div><div class="sl">Расчётов</div></div>
+  </div>
+  <div class="block">
+    <div class="blbl">Ваш профиль</div>
+    <div class="field"><label>Имя</label><input type="text" id="p-name-i" placeholder="Как вас зовут?"/></div>
+    <div class="field"><label>Дата рождения</label><input type="date" id="p-bdate-i"/></div>
+    <div class="field" style="margin-bottom:16px"><label>Полное имя для нумерологии</label><input type="text" id="p-fn-i" placeholder="Полное имя по-русски"/></div>
+    <button class="btn btn-a" onclick="saveProf()">Сохранить профиль</button>
+  </div>
+  <div class="menu-block">
+    <div class="mi" onclick="goTab('subscription')">
+      <div class="mi-l"><div class="mi-ic">♦</div><div><div class="mi-t">Подписка <span class="mi-badge" id="m-plan-badge">Базовый</span></div><div class="mi-s">Управление тарифом</div></div></div>
+      <div class="mi-chevron">›</div>
+    </div>
+    <div class="mi" onclick="goTab('numerology');fillProf()">
+      <div class="mi-l"><div class="mi-ic">🔢</div><div><div class="mi-t">Моя нумерология</div><div class="mi-s">Рассчитать по профилю</div></div></div>
+      <div class="mi-chevron">›</div>
+    </div>
+    <div class="mi" onclick="goTab('horoscope')">
+      <div class="mi-l"><div class="mi-ic">♒</div><div><div class="mi-t">Гороскоп</div><div class="mi-s">Предсказание на сегодня</div></div></div>
+      <div class="mi-chevron">›</div>
+    </div>
+    <div class="mi" onclick="goTab('compat')">
+      <div class="mi-l"><div class="mi-ic">💞</div><div><div class="mi-t">Совместимость</div><div class="mi-s">Числовая совместимость пары</div></div></div>
+      <div class="mi-chevron">›</div>
+    </div>
+    <div class="mi" onclick="showHistory()">
+      <div class="mi-l"><div class="mi-ic">📅</div><div><div class="mi-t">История карт</div><div class="mi-s" id="hist-count-lbl">Ваши прошлые карты</div></div></div>
+      <div class="mi-chevron">›</div>
+    </div>
+  </div>
+
+  <!-- HISTORY BLOCK -->
+  <div id="history-block" class="hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 10px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500">История карт</div>
+      <button onclick="clearHistory()" style="background:none;border:none;color:var(--dim);font-size:12px;cursor:pointer;font-weight:600">Очистить</button>
+    </div>
+    <div id="history-lock-wrap" style="margin:0 16px 12px;position:relative;border-radius:var(--r);overflow:hidden">
+      <div id="history-lock" class="lock-overlay" onclick="goTab('subscription')">
+        <div class="lock-icon">🔒</div><div class="lock-title">История раскладов</div>
+        <div class="lock-sub">Доступно в тарифе Arcana Pro</div><button class="lock-btn">Открыть</button>
+      </div>
+      <div class="block" style="margin:0;padding:0;overflow:hidden" id="history-list"></div>
+    </div>
+  </div>
+  <div style="height:32px"></div>
+</div>
+
+<!-- ══ SUBSCRIPTION ══ -->
+<div class="page" id="page-subscription">
+  <div class="sub-hero">
+    <div class="eyebrow">Доступ</div>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;line-height:1.05;margin-bottom:8px"><em style="font-style:italic;color:var(--gold2)">Подписка</em></h1>
+    <p style="font-size:13px;color:var(--dim);font-weight:500">Выберите уровень познания</p>
+  </div>
+  <div class="plan-c" id="plan-free">
+    <div class="plan-nm">Базовый</div>
+    <div class="plan-pr">0 ⭐ <span>/ навсегда</span></div>
+    <div class="plan-sub">Начните знакомство с Arcana</div>
+    <ul class="plan-feats">
+      <li><span class="fd"></span>Карта дня — Старшие Арканы (22 карты)</li>
+      <li><span class="fd"></span>Нумерология — 4 числа</li>
+      <li class="off"><span class="fd"></span>Расклад «Три карты»</li>
+      <li class="off"><span class="fd"></span>Расклад «Кельтский крест»</li>
+      <li class="off"><span class="fd"></span>Малые Арканы (56 карт)</li>
+      <li class="off"><span class="fd"></span>Нумерология — все 6 чисел + матрица</li>
+      <li class="off"><span class="fd"></span>Матрица судьбы</li>
+      <li class="off"><span class="fd"></span>История раскладов</li>
+      <li class="off"><span class="fd"></span>Персональный гороскоп</li>
+      <li class="off"><span class="fd"></span>Совместимость по числам</li>
+    </ul>
+    <div class="curr-b hidden" id="free-curr">✦ Ваш текущий тариф</div>
+  </div>
+  <div class="plan-c feat" id="plan-pro">
+    <div class="plan-badge">Популярный</div>
+    <div class="plan-nm">Arcana Pro</div>
+    <div class="plan-pr">299 ⭐ <span>/ навсегда</span></div>
+    <div class="plan-sub">Единоразовая покупка — навсегда</div>
+    <ul class="plan-feats">
+      <li><span class="fd"></span>Карта дня — Старшие Арканы (22 карты)</li>
+      <li><span class="fd"></span>Расклад «Три карты»</li>
+      <li><span class="fd"></span>Расклад «Кельтский крест»</li>
+      <li><span class="fd"></span>Малые Арканы (56 карт)</li>
+      <li><span class="fd"></span>Нумерология — все 6 чисел</li>
+      <li><span class="fd"></span>Матрица судьбы</li>
+      <li><span class="fd"></span>История раскладов — 30 дней</li>
+      <li class="off"><span class="fd"></span>Персональный гороскоп</li>
+      <li class="off"><span class="fd"></span>Совместимость по числам</li>
+    </ul>
+    <div class="curr-b hidden" id="pro-curr">✦ Ваш текущий тариф</div>
+    <button class="btn btn-a" onclick="sub('pro')">Купить за 299 ⭐</button>
+  </div>
+  <div class="plan-c" id="plan-premium">
+    <div class="plan-nm">Arcana Premium</div>
+    <div class="plan-pr">489 ⭐ <span>/ навсегда</span></div>
+    <div class="plan-sub">Единоразовая покупка — навсегда</div>
+    <ul class="plan-feats">
+      <li><span class="fd"></span>Всё из Arcana Pro</li>
+      <li><span class="fd"></span>Персональный гороскоп</li>
+      <li><span class="fd"></span>Совместимость по числам</li>
+      <li><span class="fd"></span>История раскладов без лимита</li>
+      <li><span class="fd"></span>Приоритетные обновления</li>
+    </ul>
+    <div class="curr-b gold hidden" id="prem-curr">✦ Ваш текущий тариф</div>
+    <button class="btn btn-g" onclick="sub('premium')">Купить за 489 ⭐</button>
+  </div>
+  <p style="text-align:center;font-size:11px;color:var(--dim);padding:4px 24px 32px;line-height:1.8;font-weight:500">Оплата через Telegram Stars · Единоразово, навсегда</p>
+</div>
+
+</div><!-- /content -->
+
+<nav id="nav">
+  <button class="ni active" onclick="goTab('tarot')" id="nav-tarot">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="11" rx="1.5"/><rect x="14" y="3" width="7" height="11" rx="1.5"/><rect x="3" y="17" width="18" height="4" rx="1.5"/></svg>
+    <span>Таро</span><span class="ni-pip"></span>
+  </button>
+  <button class="ni" onclick="goTab('numerology')" id="nav-numerology">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    <span>Числа</span><span class="ni-pip"></span>
+  </button>
+  <button class="ni" onclick="goTab('horoscope')" id="nav-horoscope">
+    <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+    <span>Гороскоп</span><span class="ni-pip"></span>
+  </button>
+  <button class="ni" onclick="goTab('profile')" id="nav-profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    <span>Профиль</span><span class="ni-pip"></span>
+  </button>
+  <button class="ni" onclick="goTab('subscription')" id="nav-subscription">
+    <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+    <span>Тариф</span><span class="ni-pip"></span>
+  </button>
+</nav>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ═══ STATE ═══ */
+const S={
+  tab:'tarot',revealed:false,
+  prof:JSON.parse(localStorage.getItem('arc_prof')||'null')||{name:'',bdate:'',fn:''},
+  stats:JSON.parse(localStorage.getItem('arc_stats')||'null')||{cards:0,calcs:0,joined:null},
+  plan:localStorage.getItem('arc_plan')||'free',
+  history:JSON.parse(localStorage.getItem('arc_history')||'[]')
+};
+
+/* ── Активация тарифа через URL-параметр после оплаты Stars ── */
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  const paid=params.get('paid');
+  const plan=params.get('plan');
+  if(paid==='1'&&(plan==='pro'||plan==='premium')){
+    S.plan=plan;
+    localStorage.setItem('arc_plan',plan);
+  }
+})();
+
+/* ═══ PLAN ACCESS ═══ */
+const PLANS=['free','pro','premium'];
+function hasPlan(min){return PLANS.indexOf(S.plan)>=PLANS.indexOf(min);}
+
+/* ═══ NAV ═══ */
+function goTab(t){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+t).classList.add('active');
+  const nav=document.getElementById('nav-'+t);
+  if(nav)nav.classList.add('active');
+  document.getElementById('content').scrollTop=0;
+  S.tab=t;
+  if(t==='profile')renderProf();
+  if(t==='subscription')renderSub();
+  if(t==='horoscope')initHoroscope();
+  if(t==='compat')applyLocks();
+}
+
+/* ═══ ARCANA DATA ═══ */
+const EL_GRAD={'Огонь':'linear-gradient(160deg,#3D1A0A 0%,#1A1020 60%)','Вода':'linear-gradient(160deg,#0A1A3D 0%,#0D1020 60%)','Воздух':'linear-gradient(160deg,#1A1A3D 0%,#0D0E20 60%)','Земля':'linear-gradient(160deg,#0A2A1A 0%,#0D1020 60%)'};
+const EL_ACCENT={'Огонь':'#FF6B5A','Вода':'#4B8FFF','Воздух':'#7B8FFF','Земля':'#4ECDC4'};
+const STRIPE_COLORS=['#FF6B5A','#7B2FBE','#4B5EFF','#C8A96E','#4ECDC4','#FF8C42','#7B8FFF','#E84393','#4B8FFF'];
+
+const A=[
+  {n:'O',name:'Шут',sym:'🌟',el:'Воздух',pl:'Уран',th:['Начало','Свобода','Авантюра'],up:'Вселенная приглашает вас сделать прыжок веры. Ваша открытость и спонтанность сейчас — главная сила. Доверьтесь неизвестному.',rev:'Излишний риск или уклонение от ответственности. Время взвесить последствия.',au:'Доверьтесь первому шагу — путь откроется в движении.',ar:'Не торопитесь. Пересмотрите планы прежде чем действовать.'},
+  {n:'I',name:'Маг',sym:'⚡',el:'Огонь',pl:'Меркурий',th:['Воля','Мастерство','Действие'],up:'У вас есть всё необходимое. Время воплощать замыслы в реальность.',rev:'Таланты применяются не туда, важные действия откладываются.',au:'Сфокусируйтесь на главном и используйте каждый ресурс.',ar:'Проверьте: нет ли манипуляции вами или с вашей стороны?'},
+  {n:'II',name:'Верховная жрица',sym:'🌙',el:'Вода',pl:'Луна',th:['Интуиция','Тайна','Мудрость'],up:'Ответы уже внутри вас. Нужны лишь тишина и доверие к собственному чутью.',rev:'Интуиция игнорируется. Что вы не хотите видеть даже в самих себе?',au:'Уединитесь. Дайте подсознанию говорить без помех.',ar:'Будьте честны с собой о том, что намеренно скрываете.'},
+  {n:'III',name:'Императрица',sym:'🌸',el:'Земля',pl:'Венера',th:['Изобилие','Творчество','Природа'],up:'Период расцвета и плодородия. Ваши проекты и отношения способны приносить богатые плоды.',rev:'Творческий застой. Пора восстановить связь с собственными потребностями.',au:'Позвольте себе получать. Красота и отдых — не роскошь.',ar:'Начните заботиться о себе так, как о других.'},
+  {n:'IV',name:'Император',sym:'🏛️',el:'Огонь',pl:'Марс',th:['Порядок','Власть','Стабильность'],up:'Время выстраивать прочную структуру. Ваша сила — в дисциплине и чётком плане.',rev:'Чрезмерный контроль или слабость воли.',au:'Создайте план и придерживайтесь его.',ar:'Найдите баланс между гибкостью и порядком.'},
+  {n:'V',name:'Иерофант',sym:'🕍',el:'Земля',pl:'Венера',th:['Традиция','Духовность','Учитель'],up:'Обратитесь к традиционной мудрости. Рост через проверенные пути.',rev:'Слепое следование догмам или бунт против системы.',au:'Ищите знание у тех, кто прошёл этот путь раньше.',ar:'Доверяйте собственному чутью, не только правилам.'},
+  {n:'VI',name:'Влюблённые',sym:'💞',el:'Воздух',pl:'Меркурий',th:['Выбор','Любовь','Ценности'],up:'Важный выбор. Он касается ваших истинных ценностей и потребует честности.',rev:'Внутренний конфликт или разлад в отношениях.',au:'Выбирайте по ценностям, а не по чужим ожиданиям.',ar:'Не избегайте трудного разговора с собой или близким.'},
+  {n:'VII',name:'Колесница',sym:'🏆',el:'Вода',pl:'Луна',th:['Победа','Контроль','Движение'],up:'Вы на пути к победе. Объедините волю и двигайтесь решительно.',rev:'Потеря направления. Что уводит вас с пути?',au:'Единство разума и чувств — ваш двигатель.',ar:'Остановитесь и уточните цель, прежде чем двигаться.'},
+  {n:'VIII',name:'Сила',sym:'🦁',el:'Огонь',pl:'Солнце',th:['Мужество','Терпение','Выдержка'],up:'Истинная сила — это мягкость и выдержка, а не напор. Вы справитесь.',rev:'Сомнения в себе или страх собственной мощи.',au:'Подходите к вызовам с самообладанием.',ar:'Признайте свою силу и прекратите бороться с самим собой.'},
+  {n:'IX',name:'Отшельник',sym:'🕯️',el:'Земля',pl:'Меркурий',th:['Уединение','Поиск','Мудрость'],up:'Время уйти в тишину. Ответы придут изнутри.',rev:'Изоляция, которая причиняет вред.',au:'Выделите время для глубокого размышления о своём пути.',ar:'Ищите баланс между уединением и общением.'},
+  {n:'X',name:'Колесо Фортуны',sym:'☸️',el:'Огонь',pl:'Юпитер',th:['Перемены','Судьба','Цикл'],up:'Удача на вашей стороне. Колесо поворачивается — используйте этот момент.',rev:'Неожиданные повороты или сопротивление переменам.',au:'Будьте гибки. Возможности появятся неожиданно.',ar:'Примите то, что вне контроля, и ищите урок.'},
+  {n:'XI',name:'Справедливость',sym:'⚖️',el:'Воздух',pl:'Венера',th:['Баланс','Правда','Карма'],up:'Действуйте по совести. Ваши поступки имеют весомые последствия.',rev:'Несправедливость или уклонение от ответственности.',au:'Взвесьте все стороны ситуации объективно.',ar:'Возьмите ответственность там, где её избегали.'},
+  {n:'XII',name:'Повешенный',sym:'🌀',el:'Вода',pl:'Нептун',th:['Пауза','Жертва','Перспектива'],up:'Добровольная остановка открывает новый угол зрения.',rev:'Застряли без цели или сопротивляетесь нужным жертвам.',au:'Замедлитесь. Позвольте увидеть то, что скрыто в движении.',ar:'Что именно вас держит? Примите решение двигаться.'},
+  {n:'XIII',name:'Смерть',sym:'🦋',el:'Вода',pl:'Плутон',th:['Трансформация','Завершение','Обновление'],up:'Что-то заканчивается, чтобы началось новое. Это освобождение.',rev:'Сопротивление переменам. Трудно отпустить прошлое.',au:'Отпустите то, что выполнило свою роль.',ar:'Страх перемен лишь откладывает неизбежное.'},
+  {n:'XIV',name:'Умеренность',sym:'🌊',el:'Огонь',pl:'Юпитер',th:['Баланс','Терпение','Интеграция'],up:'Гармония через терпение. Вы синтезируете противоположные стороны себя.',rev:'Крайности. Что выбивает вас из равновесия?',au:'Ищите золотую середину.',ar:'Начните с маленькой коррекции дисбаланса.'},
+  {n:'XV',name:'Дьявол',sym:'🔗',el:'Земля',pl:'Сатурн',th:['Зависимость','Иллюзия','Тень'],up:'Вы можете чувствовать себя в ловушке — но цепи держатся иллюзией.',rev:'Начинается освобождение или отрицание тёмных сторон.',au:'Честно взгляните: что именно удерживает вас?',ar:'Продолжайте работу с собственной тенью.'},
+  {n:'XVI',name:'Башня',sym:'🌩️',el:'Огонь',pl:'Марс',th:['Потрясение','Откровение','Разрушение'],up:'Потрясение разрушает старое — освобождая место истинному.',rev:'Вы откладываете неизбежные перемены.',au:'Не держитесь за рушащееся. Обломки дают почву.',ar:'Лучше сознательно обновить, чем ждать катастрофы.'},
+  {n:'XVII',name:'Звезда',sym:'⭐',el:'Воздух',pl:'Уран',th:['Надежда','Исцеление','Вдохновение'],up:'После бури пришла звезда. Время надежды и обновлённой веры.',rev:'Отчаяние или потеря веры. Темнота всегда временна.',au:'Позвольте себе мечтать. Вселенная поддерживает вас.',ar:'Обратитесь за поддержкой к тому, кто напомнит о свете.'},
+  {n:'XVIII',name:'Луна',sym:'🌕',el:'Вода',pl:'Нептун',th:['Иллюзия','Подсознание','Страх'],up:'Не всё — реальность. Глубокое погружение открывает скрытые истины.',rev:'Страхи рассеиваются и ясность возвращается.',au:'Доверяйте интуиции, но различайте иллюзию и факт.',ar:'Вы выходите из тумана. Смотрите трезво.'},
+  {n:'XIX',name:'Солнце',sym:'☀️',el:'Огонь',pl:'Солнце',th:['Радость','Успех','Ясность'],up:'Период ясности и успеха. Вы в своей силе — и это чувствуется.',rev:'Радость временно омрачена или вы не позволяете себе наслаждаться.',au:'Будьте открыты. Ваш свет заряжает тех, кто рядом.',ar:'Позвольте себе радоваться даже без повода.'},
+  {n:'XX',name:'Суд',sym:'📯',el:'Огонь',pl:'Плутон',th:['Пробуждение','Призыв','Освобождение'],up:'Вы слышите зов высшей цели. Время ответить честно.',rev:'Откладываете важное решение или отрицаете призыв.',au:'Обратите внимание на знаки. Ваша душа готова к следующему.',ar:'Начните с прощения — себя и других.'},
+  {n:'XXI',name:'Мир',sym:'🌍',el:'Земля',pl:'Сатурн',th:['Завершение','Целостность','Триумф'],up:'Цикл завершён. Вы достигли точки полноты и можете двигаться вперёд.',rev:'Цикл ещё не закрыт или вы торопитесь к следующей цели.',au:'Отметьте пройденный путь. Вы заслуживаете признания.',ar:'Завершите незаконченное. Тогда откроется следующая дверь.'}
+];
+
+function dayIdx(){const d=new Date();return(d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())%A.length;}
+function dayRev(){const d=new Date();return((d.getFullYear()+d.getMonth()*3+d.getDate()*7+13)%100)<35;}
+
+/* ═══ LOCKS ═══ */
+function applyLocks(){
+  const isPro=hasPlan('pro'),isPrem=hasPlan('premium');
+  const hide=el=>el&&(el.style.display='none');
+  const show=el=>el&&(el.style.display='');
+  isPro?hide(document.getElementById('sp-three-lock')):show(document.getElementById('sp-three-lock'));
+  isPro?hide(document.getElementById('sp-celtic-lock')):show(document.getElementById('sp-celtic-lock'));
+  isPro?hide(document.getElementById('matrix-lock-overlay')):show(document.getElementById('matrix-lock-overlay'));
+  isPrem?hide(document.getElementById('horoscope-lock')):show(document.getElementById('horoscope-lock'));
+  isPrem?hide(document.getElementById('compat-lock')):show(document.getElementById('compat-lock'));
+  isPro?hide(document.getElementById('history-lock')):show(document.getElementById('history-lock'));
+}
+
+/* ═══ FAN ═══ */
+function buildFan(){
+  const fan=document.getElementById('fan');fan.innerHTML='';
+  const C=9,SP=82;
+  for(let i=0;i<C;i++){
+    const t=i/(C-1),deg=-SP/2+t*SP;
+    const lift=Math.abs(Math.cos(deg*Math.PI/180)*18)-18;
+    const card=document.createElement('div');card.className='fan-card';
+    card.style.cssText=`left:50%;margin-left:-38px;transform-origin:bottom center;transform:rotate(${deg}deg) translateY(${lift}px);z-index:${i<C/2?i:C-i}`;
+    const inner=document.createElement('div');inner.className='fan-card-inner';
+    const stripe=document.createElement('div');stripe.className='fan-card-stripe';stripe.style.background=STRIPE_COLORS[i%STRIPE_COLORS.length];
+    inner.appendChild(stripe);card.appendChild(inner);fan.appendChild(card);
+  }
+}
+
+/* ═══ REVEAL ═══ */
+function revealCard(){
+  if(S.revealed)return;S.revealed=true;
+  const card=A[dayIdx()],rev=dayRev();
+  const fan=document.getElementById('fan'),fanStage=document.getElementById('fan-stage'),revStage=document.getElementById('rev-stage');
+  Array.from(fan.querySelectorAll('.fan-card')).forEach((c,i)=>{
+    const mid=4,dir=i<mid?-1:1;
+    setTimeout(()=>{c.style.transition='transform .55s var(--ease),opacity .4s';c.style.transform+=` translateX(${dir*60}px) translateY(-140px)`;c.style.opacity='0';},i*30);
+  });
+  setTimeout(()=>{fanStage.style.transition='opacity .3s';fanStage.style.opacity='0';},350);
+  setTimeout(()=>{
+    fanStage.style.display='none';
+    const art=document.getElementById('rev-art');
+    const elAcc=EL_ACCENT[card.el]||'#7B8FFF';
+    art.style.background=EL_GRAD[card.el]||'linear-gradient(160deg,#1a1a3d,#0d0e20)';
+    art.innerHTML=`<div style="position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,${elAcc}22 0%,transparent 70%);top:30%;left:50%;transform:translateX(-50%) translateY(-50%)"></div>`;
+    document.getElementById('rev-sym').textContent=card.sym;
+    document.getElementById('rev-roman').textContent=card.n;
+    document.getElementById('rev-cname').textContent=card.name;
+    document.getElementById('rev-tl').textContent=card.n;
+    document.getElementById('rev-br').textContent=card.n;
+    document.getElementById('rev-name').textContent=card.name;
+    const ob=document.getElementById('rev-orient');
+    ob.className=rev?'orient-badge rev':'orient-badge up';ob.textContent=rev?'↓ Перевёрнутая':'↑ Прямая';
+    if(rev)document.getElementById('rev-card').style.transform='rotate(180deg)';
+    document.getElementById('rev-card').style.boxShadow=`0 30px 80px rgba(0,0,0,.7),0 0 0 1px ${elAcc}55,0 0 60px ${elAcc}22`;
+    document.getElementById('rev-tags').innerHTML=card.th.map(t=>`<span class="tag">${t}</span>`).join('');
+    document.getElementById('attr-el').textContent=card.el;
+    document.getElementById('attr-pl').textContent=card.pl;
+    document.getElementById('attr-ar').textContent='Старший Аркан';
+    document.getElementById('attr-num').textContent=card.n;
+    document.getElementById('rev-meaning').innerHTML=`<strong>${rev?'Перевёрнутая':'Прямая'}:</strong> ${rev?card.rev:card.up}`;
+    document.getElementById('rev-advice').textContent=rev?card.ar:card.au;
+    revStage.classList.remove('hidden');revStage.style.opacity='0';revStage.style.transition='opacity .5s';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{revStage.style.opacity='1';}));
+    const today=new Date().toLocaleDateString('ru-RU');
+    if(!S.history.length||S.history[0].date!==today){
+      S.history.unshift({date:today,name:card.name,sym:card.sym,pos:rev?'rev':'up',n:card.n});
+      if(S.history.length>30)S.history=S.history.slice(0,30);
+      localStorage.setItem('arc_history',JSON.stringify(S.history));
+    }
+    S.stats.cards++;saveStats();
+  },720);
+}
+
+/* ═══ SPREAD TOGGLE ═══ */
+function setSpread(t,btn){
+  document.querySelectorAll('#page-tarot .sptab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('sp-day').style.display=t==='day'?'block':'none';
+  document.getElementById('sp-three').classList.toggle('hidden',t!=='three');
+  document.getElementById('sp-celtic').classList.toggle('hidden',t!=='celtic');
+  if(t==='three'&&typeof renderThree==='function'){renderThree();}
+  if(t==='celtic'&&typeof renderCeltic==='function'){renderCeltic();}
+}
+
+/* ═══ THREE CARDS ═══ */
+const T3P=['Прошлое','Настоящее','Будущее'];
+function buildThree(){
+  const b=dayIdx();
+  window._t3=[{card:A[(b+5)%A.length],rev:false},{card:A[b],rev:dayRev()},{card:A[(b+11)%A.length],rev:true}];
+  document.getElementById('t3grid').innerHTML=window._t3.map((t,i)=>`
+    <div class="t3slot" onclick="showT3(${i})" id="t3s${i}">
+      <div class="t3card"><div class="t3sym">${t.card.sym}</div><div class="t3n">${t.card.name}</div></div>
+      <div class="t3lbl">${T3P[i]}</div>
+    </div>`).join('');
+  document.getElementById('t3detail').classList.add('hidden');
+}
+function showT3(i){
+  document.querySelectorAll('.t3slot').forEach((e,j)=>e.classList.toggle('sel',j===i));
+  const t=window._t3[i];
+  document.getElementById('t3pos-lbl').textContent=T3P[i];
+  document.getElementById('t3sym-big').textContent=t.card.sym;
+  document.getElementById('t3name-big').textContent=t.card.name;
+  const ob=document.getElementById('t3pos-badge');ob.className=t.rev?'orient-badge rev':'orient-badge up';ob.textContent=t.rev?'↓ Перевёрнутая':'↑ Прямая';
+  document.getElementById('t3tags').innerHTML=t.card.th.map(th=>`<span class="tag">${th}</span>`).join('');
+  document.getElementById('t3meaning').innerHTML=`<strong>${t.rev?'Перевёрнутая':'Прямая'}:</strong> ${t.rev?t.card.rev:t.card.up}`;
+  document.getElementById('t3advice').textContent=t.rev?t.card.ar:t.card.au;
+  const d=document.getElementById('t3detail');d.classList.remove('hidden');
+  setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+/* ═══ CELTIC CROSS ═══ */
+const CC_LABELS=['Суть вопроса','Что пересекает','Основа','Прошлое','Корона','Будущее','Вы сами','Окружение','Надежды','Итог'];
+const CC_AREAS=['center','cross','bot','left','top','right','s1','s2','s3','s4'];
+function buildCeltic(){
+  const b=dayIdx();
+  window._cc=CC_LABELS.map((lbl,i)=>({lbl,card:A[(b+i*3)%A.length],rev:i%3===2}));
+  const grid=document.getElementById('celtic-grid');
+  grid.innerHTML=window._cc.map((c,i)=>`
+    <div class="cc-pos" data-pos="${CC_AREAS[i]}" style="grid-area:${CC_AREAS[i]}" onclick="showCC(${i})" id="ccp${i}">
+      <div class="cc-card">${c.card.sym}</div>
+      <div class="cc-lbl">${i+1}</div>
+    </div>`).join('');
+  document.getElementById('celtic-detail').classList.add('hidden');
+}
+function showCC(i){
+  document.querySelectorAll('.cc-pos').forEach((e,j)=>e.classList.toggle('sel',j===i));
+  const c=window._cc[i];
+  document.getElementById('cc-pos-lbl').textContent=`${i+1}. ${c.lbl}`;
+  document.getElementById('cc-sym-big').textContent=c.card.sym;
+  document.getElementById('cc-name-big').textContent=c.card.name;
+  const ob=document.getElementById('cc-badge');ob.className=c.rev?'orient-badge rev':'orient-badge up';ob.textContent=c.rev?'↓ Перевёрнутая':'↑ Прямая';
+  document.getElementById('cc-tags').innerHTML=c.card.th.map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('cc-meaning').innerHTML=`<strong>${c.rev?'Перевёрнутая':'Прямая'}:</strong> ${c.rev?c.card.rev:c.card.up}`;
+  const d=document.getElementById('celtic-detail');d.classList.remove('hidden');
+  setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+/* ═══ NUMEROLOGY ═══ */
+const LV={а:1,б:2,в:3,г:4,д:5,е:6,ё:7,ж:8,з:9,и:1,й:2,к:3,л:4,м:5,н:6,о:7,п:8,р:9,с:1,т:2,у:3,ф:4,х:5,ц:6,ч:7,ш:8,щ:9,ъ:1,ы:2,ь:3,э:4,ю:5,я:6};
+const VW=new Set(['а','е','ё','и','й','о','у','ы','э','ю','я']);
+const NM={
+  1:{t:'Единица — Лидер',d:'Рождены для независимости и инициативы. Ваша судьба — прокладывать новые пути. Сильная воля, оригинальность мышления и способность вести за собой — ваши главные качества.'},
+  2:{t:'Двойка — Дипломат',d:'Ваша сила — в сотрудничестве, гармонии и чуткости. Вы прирождённый миротворец с глубокой интуицией. Партнёрство и союзы — ваш путь к достижениям.'},
+  3:{t:'Тройка — Творец',d:'Самовыражение, радость и общение — ключевые темы. Вы обладаете творческим даром и способностью вдохновлять окружающих своей жизнерадостностью.'},
+  4:{t:'Четвёрка — Строитель',d:'Надёжность, терпение и практичность — основа натуры. Вы создаёте прочные фундаменты. Сила — в дисциплине и системности.'},
+  5:{t:'Пятёрка — Искатель',d:'Свобода, приключения и перемены — ваши постоянные спутники. Вы живёте ярко и легко адаптируетесь к новому.'},
+  6:{t:'Шестёрка — Хранитель',d:'Ответственность, любовь и служение — ведущие темы. Вы природный целитель и наставник.'},
+  7:{t:'Семёрка — Мыслитель',d:'Духовный поиск, мудрость и аналитический ум — ваши черты. Вы стремитесь к глубинному пониманию мира.'},
+  8:{t:'Восьмёрка — Достигатель',d:'Амбиции, сила и материальный успех — ваш путь. Баланс духовного и материального — ваш урок.'},
+  9:{t:'Девятка — Гуманист',d:'Сострадание, мудрость и служение — суть натуры. Ваш путь — отдавать миру и завершать циклы.'},
+  11:{t:'Мастер 11 — Провидец',d:'Высочайшая интуиция, духовная миссия и способность вдохновлять. Вы несёте свет, но должны управлять своей чувствительной природой.'},
+  22:{t:'Мастер 22 — Строитель мира',d:'Высшее число мастера. Вы способны воплощать великие мечты в реальность в огромном масштабе.'}
+};
+function red(n){if(n===11||n===22)return n;while(n>9){n=String(n).split('').reduce((a,d)=>a+parseInt(d),0);if(n===11||n===22)return n;}return n;}
+function dNum(d){return red(d.replace(/-/g,'').split('').reduce((a,x)=>a+parseInt(x),0));}
+function sNum(n){return red(n.toLowerCase().replace(/[^а-яё]/g,'').split('').filter(l=>VW.has(l)).reduce((a,l)=>a+(LV[l]||0),0))||1;}
+function pNum(n){return red(n.toLowerCase().replace(/[^а-яё]/g,'').split('').filter(l=>!VW.has(l)).reduce((a,l)=>a+(LV[l]||0),0))||1;}
+function nNum(n){return red(n.toLowerCase().replace(/[^а-яё]/g,'').split('').reduce((a,l)=>a+(LV[l]||0),0))||1;}
+function mNum(date,name){return red(dNum(date)+nNum(name));}
+
+function buildMatrix(dateStr){
+  const digits=dateStr.replace(/-/g,'').split('').map(Number);
+  const counts=new Array(10).fill(0);
+  digits.forEach(d=>{if(d>0)counts[d]++;});
+  const grid=document.getElementById('matrix-grid');
+  grid.innerHTML=[1,2,3,4,5,6,7,8,9].map(n=>`
+    <div class="matrix-cell ${counts[n]>0?'active':''}">
+      ${counts[n]>0?n.toString().repeat(counts[n]):'—'}
+      <span class="mc-lbl">${n}</span>
+    </div>`).join('');
+}
+
+function calcNum(){
+  const date=document.getElementById('bdate').value;
+  const name=document.getElementById('fname').value.trim();
+  if(!date){toast('Введите дату рождения');return;}
+  if(!name||!/[а-яёА-ЯЁ]/.test(name)){toast('Введите имя по-русски');return;}
+  const d=dNum(date),s=sNum(name),p=pNum(name),n=nNum(name),lp=dNum(date),m=mNum(date,name);
+  document.getElementById('r-d').textContent=d;document.getElementById('r-s').textContent=s;
+  document.getElementById('r-p').textContent=p;document.getElementById('r-n').textContent=n;
+  document.getElementById('r-lp').textContent=lp;document.getElementById('r-m').textContent=m;
+  buildMatrix(date);
+  const dm=NM[d]||NM[9],sm=NM[s]||NM[9],pm=NM[p]||NM[9],nm=NM[n]||NM[9];
+  document.getElementById('dd').innerHTML=`<strong>${dm.t}</strong><br><br>${dm.d}`;
+  document.getElementById('ds').innerHTML=`<strong>${sm.t}</strong><br><br>${sm.d}`;
+  document.getElementById('dp').innerHTML=`<strong>${pm.t}</strong><br><br>${pm.d}`;
+  document.getElementById('dn').innerHTML=`<strong>${nm.t}</strong><br><br>${nm.d}`;
+  document.getElementById('nform').classList.add('hidden');
+  document.getElementById('nresult').classList.remove('hidden');
+  S.stats.calcs++;saveStats();
+  document.getElementById('content').scrollTop=0;
+  applyLocks();
+}
+function resetNum(){document.getElementById('nresult').classList.add('hidden');document.getElementById('nform').classList.remove('hidden');}
+function fillProf(){
+  const p=S.prof;
+  if(p.bdate)document.getElementById('bdate').value=p.bdate;
+  if(p.fn)document.getElementById('fname').value=p.fn;
+  if(p.bdate&&p.fn)calcNum();
+}
+
+/* ═══ HOROSCOPE ═══ */
+const ZODIACS=[
+  {sym:'♈',name:'Овен',dates:'21 марта — 19 апреля',start:[3,21],end:[4,19],
+   desc:'Вы — огонь и инициатива. Ваша энергия зажигает других.',
+   day:['Сегодня ваша энергия на пике. Не бойтесь первым делать шаг навстречу новым возможностям — они реальны.',
+        'День призывает к терпению. Прежде чем действовать, возьмите паузу и взвесьте все стороны.',
+        'Отличный момент для завершения начатых дел. Ваша настойчивость принесёт плоды.'],
+   love:['Страсть и притяжение — в воздухе. Выражайте чувства открыто.','Возможен разговор, который расставит всё по местам.','Уделите время партнёру — ему сейчас важно ваше внимание.'],
+   career:['Инициативность будет вознаграждена. Предложите идею — она будет услышана.','Коллеги нуждаются в вашей поддержке. Будьте командным игроком.','Финансовый аспект требует внимательности — перепроверьте цифры.'],
+   health:['Хорошее время для спорта и активности. Тело просит движения.','Прислушайтесь к сигналам организма. Отдых тоже часть силы.','Избегайте перенапряжения — восстановление важнее рекорда.'],
+   lucky:{days:['Вторник','Пятница'],nums:[1,9],colors:['Красный','Оранжевый']}},
+  {sym:'♉',name:'Телец',dates:'20 апреля — 20 мая',start:[4,20],end:[5,20],
+   desc:'Вы — сила и надёжность. Ваш дар — создавать красоту и стабильность.',
+   day:['День благоприятен для долгосрочных решений. Доверяйте своей интуиции в финансовых вопросах.',
+        'Уютный и спокойный день. Насладитесь простыми радостями жизни.',
+        'Ваша практичность сегодня — ключ к успеху. Придерживайтесь плана.'],
+   love:['Romantic surprises ждут тех, кто открыт. Будьте немного спонтаннее.','Старая дружба может перерасти в нечто большее.','Выразите заботу через действия, а не только слова.'],
+   career:['Хороший день для переговоров и заключения договорённостей.','Финансовые вопросы решаются благоприятно — действуйте.','Коллеги ценят вашу надёжность. Не упускайте это из виду.'],
+   health:['Время побаловать себя — массаж или здоровая еда зарядят энергией.','Обратите внимание на режим сна.','Прогулка на свежем воздухе — именно то, что нужно.'],
+   lucky:{days:['Пятница','Суббота'],nums:[2,6],colors:['Зелёный','Розовый']}},
+  {sym:'♊',name:'Близнецы',dates:'21 мая — 20 июня',start:[5,21],end:[6,20],
+   desc:'Вы — общение и любопытство. Ваш ум всегда ищет новое.',
+   day:['Коммуникации сегодня на высоте. Важный разговор принесёт неожиданную ясность.',
+        'Не распыляйтесь — сфокусируйтесь на одном деле и доведите до конца.',
+        'Отличный день для обучения и новых знакомств.'],
+   love:['Остроумие и лёгкость — ваши козыри сегодня. Пользуйтесь ими.','Важно слушать так же хорошо, как говорить.','Романтический сюрприз для партнёра может изменить настроение дня.'],
+   career:['Ваши идеи будут приняты с энтузиазмом — смело предлагайте.','Многозадачность сегодня работает в вашу пользу.','Документы и контракты требуют внимательного прочтения.'],
+   health:['Разнообразие в тренировках даст лучший результат.','Успокойте активный ум медитацией или прогулкой.','Не пропускайте приёмы пищи — вы склонны забывать о еде в делах.'],
+   lucky:{days:['Среда','Воскресенье'],nums:[3,5],colors:['Жёлтый','Серебристый']}},
+  {sym:'♋',name:'Рак',dates:'21 июня — 22 июля',start:[6,21],end:[7,22],
+   desc:'Вы — глубина и забота. Ваша интуиция — дар, которому стоит доверять.',
+   day:['Сегодня вы особенно чувствительны. Прислушайтесь к внутреннему голосу — он не подведёт.',
+        'Домашние дела и семья — в центре внимания. Именно здесь вы черпаете силу.',
+        'Прошлое всплывает, чтобы вы его отпустили. Это шанс.'],
+   love:['Ваша искренность сегодня трогает сердца. Будьте открыты.','Уют и близость важнее грандиозных жестов.','Старые чувства могут ожить — это неслучайно.'],
+   career:['Доверяйте профессиональной интуиции при принятии решений.','Работа в команде даётся особенно хорошо.','Создайте комфортную обстановку — это повысит продуктивность.'],
+   health:['Эмоциональное состояние напрямую влияет на самочувствие. Берегите его.','Вода в любом виде — ваш союзник сегодня.','Общение с близкими восстанавливает силы лучше любого лекарства.'],
+   lucky:{days:['Понедельник','Четверг'],nums:[2,7],colors:['Белый','Серебристый']}},
+  {sym:'♌',name:'Лев',dates:'23 июля — 22 августа',start:[7,23],end:[8,22],
+   desc:'Вы — свет и великодушие. Ваше присутствие меняет атмосферу.',
+   day:['Ваша харизма на пике. Время выйти на первый план и показать, на что вы способны.',
+        'Щедрость сегодня вернётся вам сторицей. Отдавайте от сердца.',
+        'Творческие начинания благословлены. Действуйте смело.'],
+   love:['Романтика в воздухе — не упустите этот момент.','Ваш партнёр нуждается в признании. Скажите важные слова.',
+         'Одиноким Львам: уверенность в себе — лучший магнит.'],
+   career:['День для лидерства. Берите инициативу — она сейчас в правильных руках.','Ваш творческий подход к задаче удивит даже скептиков.','Похвала от руководства возможна — старайтесь.'],
+   health:['Сердце и спина — зоны внимания сегодня.','Танцы или любое творческое движение зарядит лучше кофе.','Позвольте себе немного тщеславия — выглядеть хорошо = чувствовать себя хорошо.'],
+   lucky:{days:['Воскресенье','Вторник'],nums:[1,4],colors:['Золотой','Оранжевый']}},
+  {sym:'♍',name:'Дева',dates:'23 августа — 22 сентября',start:[8,23],end:[9,22],
+   desc:'Вы — точность и служение. Ваша внимательность — редкий дар.',
+   day:['Аналитическое мышление сегодня на высоте. Разберитесь с тем, что давно откладывали.',
+        'Детали сегодня решают всё. Ваша скрупулёзность — преимущество.',
+        'Забота о других важна, но не забудьте о себе.'],
+   love:['Искренний разговор о чувствах сдвинет отношения с мёртвой точки.','Не критикуйте партнёра — замените критику на поддержку.','Небольшой знак внимания скажет больше долгих речей.'],
+   career:['Работа с документами, анализом или данными — в вашу пользу.','Коллеги обращаются к вам за советом не случайно — вы видите суть.',
+          'Не берите на себя чужих задач — фокус важен.'],
+   health:['Пищеварение — ваша чувствительная зона. Ешьте осознанно.','Чистота пространства напрямую влияет на ваше состояние.','Небольшая ежедневная рутина — фундамент вашего здоровья.'],
+   lucky:{days:['Среда','Пятница'],nums:[5,3],colors:['Серый','Тёмно-зелёный']}},
+  {sym:'♎',name:'Весы',dates:'23 сентября — 22 октября',start:[9,23],end:[10,22],
+   desc:'Вы — гармония и красота. Ваше присутствие всегда уравновешивает.',
+   day:['Сотрудничество сегодня приносит лучшие плоды, чем одиночные усилия.',
+        'День для принятия решений. Выберите — промедление стоит дороже.',
+        'Красота и искусство вдохновят и дадут новые силы.'],
+   love:['Компромисс — ключ к гармонии сегодня.','Партнёр ценит вашу заботу о равновесии.',
+         'Приятный разговор может перерасти в нечто глубже.'],
+   career:['Переговоры и партнёрства — ваш конёк сегодня.','Коллективные решения лучше единоличных.',
+          'Поддержите коллегу — это вернётся сторицей.'],
+   health:['Почки и поясница — зоны внимания.','Балансирующие практики: йога или тай-чи — идеальны.',
+          'Красивая обстановка буквально лечит — обновите пространство.'],
+   lucky:{days:['Пятница','Понедельник'],nums:[6,2],colors:['Розовый','Голубой']}},
+  {sym:'♏',name:'Скорпион',dates:'23 октября — 21 ноября',start:[10,23],end:[11,21],
+   desc:'Вы — глубина и трансформация. Ваша интенсивность меняет всё.',
+   day:['Интуиция сегодня раскрывает скрытое. Доверяйте первому ощущению.',
+        'Отпустите то, что больше не служит вам. Освобождение даёт силу.',
+        'Трансформация — ваша стихия. Сегодня хорошее время начать её.'],
+   love:['Глубокий разговор сближает больше, чем совместный ужин.','Ревность и контроль — не любовь. Напомните себе об этом.',
+         'Страстный день — используйте эту энергию мудро.'],
+   career:['Расследование, исследование, анализ — ваши суперсилы сегодня.','Не раскрывайте карты раньше времени.',
+          'Финансовые тайны могут проясниться — будьте внимательны.'],
+   health:['Репродуктивная система и выделительные органы — зоны заботы.','Детокс — в любом виде — вам на пользу сегодня.',
+          'Трансформируйте негативную энергию в спорт или творчество.'],
+   lucky:{days:['Вторник','Четверг'],nums:[8,9],colors:['Бордовый','Чёрный']}},
+  {sym:'♐',name:'Стрелец',dates:'22 ноября — 21 декабря',start:[11,22],end:[12,21],
+   desc:'Вы — свобода и оптимизм. Ваши стрелы всегда летят далеко.',
+   day:['Горизонты расширяются. Поставьте большую цель — именно сейчас самое время.',
+        'Путешествие или новое знание зарядит вас лучше отдыха.',
+        'Философский взгляд на проблему даст неожиданное решение.'],
+   love:['Свобода в отношениях — необходимость, а не каприз. Говорите об этом.',
+         'Приключение вдвоём сближает больше рутины.',
+         'Честность — ваш главный язык любви.'],
+   career:['Дальние контакты или международные проекты обещают успех.',
+          'Обучение и саморазвитие открывают новые двери.',
+          'Будьте осторожны с обещаниями — давайте только те, что сможете выполнить.'],
+   health:['Бёдра и печень — зоны внимания.','Активный спорт на свежем воздухе — ваш идеальный день.',
+          'Оптимизм напрямую влияет на иммунитет. Держите его высоко.'],
+   lucky:{days:['Четверг','Суббота'],nums:[3,9],colors:['Фиолетовый','Синий']}},
+  {sym:'♑',name:'Козерог',dates:'22 декабря — 19 января',start:[12,22],end:[1,19],
+   desc:'Вы — дисциплина и мастерство. Ваш путь наверх — самый надёжный.',
+   day:['Труд сегодня вознаграждается. Сделайте шаг к долгосрочной цели.',
+        'Авторитет и опыт открывают двери там, где другие стучатся напрасно.',
+        'Планирование сегодня важнее действия. Составьте карту пути.'],
+   love:['Покажите уязвимость — это сделает вас ближе, а не слабее.',
+         'Партнёр нуждается не в советах, а в поддержке.',
+         'Традиционный жест — цветы, ужин — работает лучше оригинальности.'],
+   career:['День для карьерных решений. Вы видите путь там, где другие сомневаются.',
+          'Ваша надёжность — лучший аргумент в любых переговорах.',
+          'Финансовая дисциплина сегодня даст плоды в будущем.'],
+   health:['Кости, колени, кожа — зоны внимания.','Режим — ваш союзник. Не нарушайте его сегодня.',
+          'Отдых — не слабость, а часть стратегии.'],
+   lucky:{days:['Суббота','Вторник'],nums:[4,8],colors:['Коричневый','Тёмно-синий']}},
+  {sym:'♒',name:'Водолей',dates:'20 января — 18 февраля',start:[1,20],end:[2,18],
+   desc:'Вы — инновации и человечество. Ваши идеи опережают время.',
+   day:['Нестандартный подход сегодня даёт нестандартный результат. Не бойтесь быть оригинальным.',
+        'Общение с единомышленниками вдохновит и откроет новые горизонты.',
+        'Технологии и инновации — ваши союзники сегодня.'],
+   love:['Дружба — лучшая основа для романтики. Помните об этом.',
+         'Позвольте партнёру удивить вас — не всё нужно планировать.',
+         'Ваша независимость привлекает, но не отдаляйтесь слишком.'],
+   career:['Революционная идея может изменить ход проекта.','Работа в команде единомышленников — в вашу пользу.',
+          'Технические решения приходят к вам быстрее, чем к другим.'],
+   health:['Лодыжки и кровообращение — зоны внимания.','Необычные методы оздоровления могут оказаться эффективными.',
+          'Общение и социальная активность — лучшее лекарство.'],
+   lucky:{days:['Суббота','Среда'],nums:[7,4],colors:['Электрик','Бирюзовый']}},
+  {sym:'♓',name:'Рыбы',dates:'19 февраля — 20 марта',start:[2,19],end:[3,20],
+   desc:'Вы — сострадание и творчество. Ваша душа чувствует невидимое.',
+   day:['Интуиция сегодня работает на максимуме. Доверяйте снам и внутренним образам.',
+        'Творчество и духовность дают ответы там, где логика бессильна.',
+        'День для исцеления — себя и других.'],
+   love:['Романтика — ваша стихия. Создайте атмосферу, а не просто момент.',
+         'Граница между слиянием и потерей себя сегодня важна.',
+         'Прощение освобождает обоих.'],
+   career:['Интуиция в делах работает лучше анализа — доверяйте ей.',
+          'Творческие проекты дают лучший результат, чем рутинные.',
+          'Избегайте обмана — он обязательно выйдет наружу.'],
+   health:['Ступни и иммунитет — зоны заботы.','Вода, медитация, музыка — ваши целители.',
+          'Избегайте токсичных людей — вы впитываете чужую энергию.'],
+   lucky:{days:['Четверг','Пятница'],nums:[7,2],colors:['Морской','Лавандовый']}}
+];
+
+function getZodiac(dateStr){
+  if(!dateStr)return null;
+  const d=new Date(dateStr);const m=d.getMonth()+1,day=d.getDate();
+  for(const z of ZODIACS){
+    const[sm,sd]=z.start,[em,ed]=z.end;
+    if((m===sm&&day>=sd)||(m===em&&day<=ed))return z;
+    if(sm===12&&em===1){if((m===12&&day>=sd)||(m===1&&day<=ed))return z;}
+  }
+  return ZODIACS[11];
+}
+
+let _zodiac=null;
+
+function initHoroscope(){
+  const grid=document.getElementById('zodiac-grid');
+  if(!grid.innerHTML){
+    grid.innerHTML=ZODIACS.map((z,i)=>`<div class="zod-card" onclick="selectZodiac(${i})" id="zc${i}"><div class="zod-sym">${z.sym}</div><div class="zod-name">${z.name}</div></div>`).join('');
+  }
+  if(S.prof.bdate){
+    document.getElementById('horo-bdate').value=S.prof.bdate;
+    updateZodiac();
+  }
+  applyLocks();
+}
+
+function updateZodiac(){
+  const val=document.getElementById('horo-bdate').value;
+  const z=getZodiac(val);
+  if(z){
+    _zodiac=z;
+    document.getElementById('zodiac-auto-sym').textContent=z.sym;
+    document.getElementById('zodiac-auto-name').textContent=z.name;
+    document.getElementById('zodiac-detected').style.display='block';
+    const idx=ZODIACS.indexOf(z);
+    document.querySelectorAll('.zod-card').forEach((el,i)=>el.classList.toggle('active',i===idx));
+  }
+}
+
+function selectZodiac(i){
+  _zodiac=ZODIACS[i];
+  document.querySelectorAll('.zod-card').forEach((el,j)=>el.classList.toggle('active',j===i));
+  document.getElementById('zodiac-auto-sym').textContent=_zodiac.sym;
+  document.getElementById('zodiac-auto-name').textContent=_zodiac.name;
+  document.getElementById('zodiac-detected').style.display='block';
+}
+
+function showHoroscope(){
+  if(!_zodiac){toast('Выберите знак зодиака');return;}
+  const z=_zodiac;
+  const d=new Date();const seed=(d.getDate()+d.getMonth()*7)%3;
+  const lucky=z.lucky;
+  const luckyDay=lucky.days[d.getDate()%lucky.days.length];
+  const luckyNum=lucky.nums[d.getDate()%lucky.nums.length];
+  const luckyColor=lucky.colors[d.getDate()%lucky.colors.length];
+  document.getElementById('h-sym').textContent=z.sym;
+  document.getElementById('h-name').textContent=z.name;
+  document.getElementById('h-dates').textContent=z.dates;
+  document.getElementById('h-day').textContent=z.day[seed];
+  document.getElementById('h-love').textContent=z.love[seed];
+  document.getElementById('h-career').textContent=z.career[seed];
+  document.getElementById('h-health').textContent=z.health[seed];
+  document.getElementById('h-lucky-day').textContent=luckyDay;
+  document.getElementById('h-lucky-num').textContent=luckyNum;
+  document.getElementById('h-lucky-color').textContent=luckyColor;
+  document.getElementById('horoscope-content').style.display='none';
+  document.getElementById('horoscope-lock-wrap').style.display='none';
+  document.getElementById('horoscope-result').classList.remove('hidden');
+  document.getElementById('content').scrollTop=0;
+}
+function resetHoroscope(){
+  document.getElementById('horoscope-result').classList.add('hidden');
+  document.getElementById('horoscope-lock-wrap').style.display='';
+  document.getElementById('horoscope-content').style.display='';
+  applyLocks();
+}
+
+/* ═══ COMPATIBILITY ═══ */
+const COMPAT_DATA={
+  '1-1':'Два лидера. Союз сильных воль. Восхищение и соперничество. Требует уважения пространства друг друга. Потенциал — высокий, если оба зрелы.',
+  '1-2':'Классика: лидер и дипломат. Вы дополняете друг друга. 2 смягчает напор 1, 1 даёт 2 направление.',
+  '1-5':'Оба ценят свободу и движение. Союз искателей. Скука вам не грозит, но нужна общая цель.',
+  '2-2':'Нежность, чуткость, взаимопонимание. Избегайте взаимной нерешительности.',
+  '3-6':'Творчество встречает заботу. Тёплый союз. 6 создаёт гнездо, 3 наполняет его радостью.',
+  '4-4':'Надёжность вдвойне. Вы строите вместе что-то долговечное. Избегайте рутины.',
+  '6-9':'Гуманизм и служение. Союз с высокой миссией. Оба отдают миру — важно не забывать о себе.',
+  'default':'Ваши числа создают интересное сочетание. Ключ — в осознанном диалоге и уважении к различиям.'
+};
+function getCompatScore(n1,n2){
+  const perfect=[[1,5],[2,4],[3,6],[7,9],[1,9],[2,6],[3,9],[4,8],[5,7],[6,8],[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7],[8,8],[9,9],[2,9],[3,7],[4,6]];
+  const hard=[[1,4],[2,8],[3,8],[5,9],[1,8],[4,5]];
+  const isPerfect=perfect.some(([a,b])=>(a===n1&&b===n2)||(a===n2&&b===n1));
+  const isHard=hard.some(([a,b])=>(a===n1&&b===n2)||(a===n2&&b===n1));
+  const base=50;const vary=((n1*n2*7+n1+n2*3)%25);
+  if(isPerfect)return Math.min(98,75+vary);
+  if(isHard)return Math.max(35,42+vary%15);
+  return Math.min(85,55+vary);
+}
+
+function calcCompat(){
+  const d1=document.getElementById('c-date1').value,d2=document.getElementById('c-date2').value;
+  const n1=document.getElementById('c-name1').value.trim(),n2=document.getElementById('c-name2').value.trim();
+  if(!d1||!d2){toast('Введите обе даты');return;}
+  const num1=dNum(d1),num2=dNum(d2);
+  const joint=red(num1+num2);
+  const score=getCompatScore(num1,num2);
+  const scoreColor=score>=75?'var(--teal)':score>=55?'var(--gold)':'var(--coral)';
+  const scoreLabel=score>=80?'Высокая совместимость':score>=65?'Хорошая совместимость':score>=50?'Средняя совместимость':'Непростой союз';
+  const key=`${Math.min(num1,num2)}-${Math.max(num1,num2)}`;
+  const desc=COMPAT_DATA[key]||COMPAT_DATA['default'];
+  document.getElementById('c-score').textContent=score+'%';
+  document.getElementById('c-score').style.color=scoreColor;
+  document.getElementById('c-bar').style.width=score+'%';
+  document.getElementById('c-bar').style.background=scoreColor;
+  document.getElementById('c-label').textContent=scoreLabel;
+  document.getElementById('c-label').style.color=scoreColor;
+  document.getElementById('c-desc').textContent=desc;
+  document.getElementById('c-n1-lbl').textContent=n1||'Человек 1';
+  document.getElementById('c-n2-lbl').textContent=n2||'Человек 2';
+  document.getElementById('c-num1').textContent=num1;
+  document.getElementById('c-num2').textContent=num2;
+  document.getElementById('c-num-joint').textContent=joint;
+  const detail=`Число судьбы ${num1} и ${num2} ${score>=65?'гармонично сочетаются':'требуют осознанной работы'}. Совместное число ${joint} указывает на ${NM[joint]?NM[joint].t.split('—')[1].trim():'особый потенциал союза'}.`;
+  document.getElementById('c-detail').textContent=detail;
+  document.getElementById('compat-result').classList.remove('hidden');
+  document.getElementById('content').scrollTop=0;
+}
+function resetCompat(){
+  document.getElementById('compat-result').classList.add('hidden');
+}
+
+/* ═══ HISTORY ═══ */
+function showHistory(){
+  const block=document.getElementById('history-block');
+  const list=document.getElementById('history-list');
+  block.classList.toggle('hidden');
+  if(!block.classList.contains('hidden')){
+    const cnt=document.getElementById('hist-count-lbl');
+    cnt.textContent=S.history.length?`${S.history.length} карт сохранено`:'Ваши прошлые карты';
+    if(!S.history.length){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--dim);font-size:13px">История пуста — откройте карту дня</div>';return;}
+    list.innerHTML=S.history.map(h=>`
+      <div class="hist-item">
+        <div class="hist-sym">${h.sym}</div>
+        <div class="hist-info">
+          <div class="hist-name">${h.name}</div>
+          <div class="hist-date">${h.date}</div>
+        </div>
+        <span class="hist-pos ${h.pos==='up'?'up':'rv'}">${h.pos==='up'?'↑ Прямая':'↓ Перевёрнутая'}</span>
+      </div>`).join('');
+    applyLocks();
+  }
+}
+function clearHistory(){
+  if(!confirm('Очистить всю историю карт?'))return;
+  S.history=[];localStorage.removeItem('arc_history');
+  document.getElementById('history-block').classList.add('hidden');
+  toast('История очищена');
+}
+
+/* ═══ PROFILE ═══ */
+function planLbl(pl){return{free:'Базовый',pro:'Pro',premium:'Premium'}[pl]||'Базовый';}
+function saveProf(){
+  const name=document.getElementById('p-name-i').value.trim();
+  if(!name){toast('Введите имя');return;}
+  if(!S.stats.joined)S.stats.joined=Date.now();
+  S.prof={name,bdate:document.getElementById('p-bdate-i').value,fn:document.getElementById('p-fn-i').value.trim()};
+  localStorage.setItem('arc_prof',JSON.stringify(S.prof));
+  saveStats();renderProf();toast('Профиль сохранён ✦');
+}
+function renderProf(){
+  const p=S.prof;
+  document.getElementById('p-name').textContent=p.name||'Гость';
+  document.getElementById('p-plan').textContent='Arcana '+planLbl(S.plan);
+  document.getElementById('m-plan-badge').textContent=planLbl(S.plan);
+  if(p.name)document.getElementById('p-name-i').value=p.name;
+  if(p.bdate)document.getElementById('p-bdate-i').value=p.bdate;
+  if(p.fn)document.getElementById('p-fn-i').value=p.fn;
+  const days=S.stats.joined?Math.floor((Date.now()-S.stats.joined)/86400000)+1:0;
+  document.getElementById('st-d').textContent=days;
+  document.getElementById('st-c').textContent=S.stats.cards;
+  document.getElementById('st-n').textContent=S.stats.calcs;
+  const cnt=S.history.length;
+  document.getElementById('hist-count-lbl').textContent=cnt?`${cnt} карт сохранено`:'Ваши прошлые карты';
+}
+function saveStats(){localStorage.setItem('arc_stats',JSON.stringify(S.stats));}
+
+/* ═══ SUBSCRIPTION ═══ */
+function renderSub(){
+  ['free','pro','premium'].forEach(pl=>{const el=document.getElementById(pl+'-curr');if(el)el.classList.toggle('hidden',S.plan!==pl);});
+  applyLocks();
+}
+
+/* ═══ ОПЛАТА ЧЕРЕЗ TELEGRAM STARS ═══ */
+function sub(pl){
+  const tg=window.Telegram&&window.Telegram.WebApp;
+
+  // Вне Telegram (тест в браузере) — активируем сразу
+  if(!tg||!tg.initDataUnsafe||!tg.initDataUnsafe.user){
+    S.plan=pl;
+    localStorage.setItem('arc_plan',pl);
+    renderSub();renderProf();applyLocks();
+    toast('Arcana '+planLbl(pl)+' активирован ✦');
+    return;
+  }
+
+  // Внутри Telegram — отправляем боту запрос на создание инвойса
+  toast('Открываем оплату…');
+  tg.sendData('buy:'+pl);
+}
+
+/* ═══ TOAST ═══ */
+let _tt;
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2800);}
+
+/* ═══ INIT ═══ */
+(function(){
+  const d=new Date();
+  document.getElementById('hero-date').textContent=d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  buildFan();renderProf();renderSub();
+  document.getElementById('sp-three').classList.add('hidden');
+  document.getElementById('sp-celtic').classList.add('hidden');
+  document.getElementById('sp-day').style.display='block';
+  try{if(window.Telegram&&window.Telegram.WebApp){window.Telegram.WebApp.ready();window.Telegram.WebApp.expand();}}catch(e){}
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ARCANA · ADD-ON v2
+   ══════════════════════════════════════════════════════════════ */
+(function(){
+const RANK={free:0,pro:1,premium:2};
+const FEATURES={
+  three:'pro', celtic:'pro', minor:'pro', num6:'pro', matrix:'pro', history:'pro',
+  horoscope:'premium', compat:'premium'
+};
+const PLAN_NAME={pro:'Arcana Pro',premium:'Arcana Premium'};
+window.has=function(f){return RANK[S.plan]>=RANK[FEATURES[f]];};
+
+window.paywall=function(reqf,title,desc){
+  const req=FEATURES[reqf]; const nm=PLAN_NAME[req];
+  return `<div class="paywall fi">
+    <div class="pw-glow"></div>
+    <div class="pw-ic">🔒</div>
+    <div class="pw-pill ${req}">${req==='premium'?'PREMIUM':'PRO'}</div>
+    <div class="pw-t">${title}</div>
+    <div class="pw-d">${desc}</div>
+    <button class="btn ${req==='premium'?'btn-g':'btn-a'}" onclick="goTab('subscription')">Открыть в ${nm}</button>
+  </div>`;
+};
+
+const RANKS=['Туз','Двойка','Тройка','Четвёрка','Пятёрка','Шестёрка','Семёрка','Восьмёрка','Девятка','Десятка','Паж','Рыцарь','Королева','Король'];
+const SUITS=[
+  {key:'wands', nm:'Жезлы',   gen:'Жезлов',   sym:'🪄', el:'Огонь'},
+  {key:'cups',  nm:'Кубки',   gen:'Кубков',   sym:'🍷', el:'Вода'},
+  {key:'swords',nm:'Мечи',    gen:'Мечей',    sym:'⚔️', el:'Воздух'},
+  {key:'pents', nm:'Пентакли',gen:'Пентаклей',sym:'🪙', el:'Земля'},
+];
+const MV={
+ wands:[
+  [['Искра','Начало','Энергия'],'Вспышка вдохновения и новый импульс — идея, страсть, старт дела.','Задержка старта, растраченная энергия, сомнения в замысле.','Действуйте, пока горит искра.','Найдите то, что снова вас зажжёт.'],
+  [['Планы','Выбор','Горизонт'],'Первый успех и взгляд вдаль: пора решить, куда расширяться.','Страх выйти из зоны комфорта, нерешительность.','Составьте план и выбирайте смело.','Не застревайте в раздумьях.'],
+  [['Рост','Ожидание','Перспектива'],'Первые плоды видны, корабли в пути — расширение горизонтов.','Задержки, неоправданные ожидания, узкий взгляд.','Продолжайте — запущенное вернётся.','Пересмотрите стратегию роста.'],
+  [['Праздник','Гармония','Дом'],'Стабильность и радость, повод для торжества и единения.','Шаткая гармония, отложенный праздник, напряжение.','Отметьте достигнутое с близкими.','Укрепите фундамент прежде празднования.'],
+  [['Соперничество','Спор','Хаос'],'Конкуренция и столкновение интересов — энергия ищет выход.','Избегание конфликта или его завершение.','Превратите соперничество в развитие.','Выбирайте свои битвы мудро.'],
+  [['Победа','Признание','Триумф'],'Заслуженная победа и публичное признание.','Отложенный успех, сомнения в признании.','Примите победу с достоинством.','Успех придёт — продолжайте путь.'],
+  [['Защита','Стойкость','Вызов'],'Вы отстаиваете позицию, у вас преимущество высоты.','Усталость от борьбы, желание сдаться.','Держите оборону — правда за вами.','Оцените, стоит ли эта битва сил.'],
+  [['Скорость','Движение','Новости'],'Стремительное развитие событий, быстрые новости и решения.','Задержки, спешка, недопонимание.','Действуйте быстро, ловите момент.','Притормозите, чтобы не ошибиться.'],
+  [['Выдержка','Граница','Стойкость'],'Последнее усилие: вы устали, но почти у цели.','Истощение, оборона из страха, упрямство.','Соберитесь — финал близко.','Опустите щит там, где угрозы нет.'],
+  [['Бремя','Ответственность','Перегруз'],'Тяжёлая ноша обязанностей — вы тянете слишком много.','Освобождение от лишнего, делегирование.','Снимите часть нагрузки.','Отпустите то, что не ваше нести.'],
+  [['Энтузиазм','Идея','Вестник'],'Юный энтузиаст с идеей, добрые вести о начинании.','Незрелость, разбросанность, пустые обещания.','Дайте идее шанс и действуйте.','Доведите хотя бы одно дело до конца.'],
+  [['Действие','Страсть','Авантюра'],'Стремительный, страстный, готов к приключению и риску.','Импульсивность, безрассудство, нетерпение.','Направьте энергию в одно русло.','Думайте, прежде чем мчаться.'],
+  [['Уверенность','Харизма','Тепло'],'Уверенная, тёплая, вдохновляющая натура с внутренним огнём.','Ревность, требовательность, выгорание.','Светите, оставаясь собой.','Восстановите силы прежде, чем отдавать.'],
+  [['Лидерство','Видение','Воля'],'Зрелый лидер с ясным видением, ведёт за собой смело.','Авторитарность, нетерпимость, упрямство.','Ведите примером и вдохновением.','Слушайте других, не только себя.'],
+ ],
+ cups:[
+  [['Любовь','Чувство','Исток'],'Открытое сердце, новое чувство, поток любви и интуиции.','Закрытость, подавленные эмоции, пустота.','Позвольте себе чувствовать и принимать.','Откройте сердце снова — мягко.'],
+  [['Союз','Притяжение','Гармония'],'Взаимное притяжение, партнёрство, родство душ.','Разлад, дисбаланс в отношениях.','Стройте связь на равенстве.','Восстановите баланс в паре.'],
+  [['Дружба','Праздник','Радость'],'Радость в кругу близких, дружба и поддержка.','Перебор, сплетни, поверхностность.','Цените тех, кто рядом.','Выбирайте искренний круг.'],
+  [['Апатия','Скука','Переоценка'],'Неудовлетворённость: вы не замечаете того, что вам предлагают.','Пробуждение интереса, новая открытость.','Оглянитесь — дары рядом.','Скажите «да» новой возможности.'],
+  [['Утрата','Печаль','Сожаление'],'Сожаление о потерянном — но не всё потеряно.','Принятие, исцеление, движение дальше.','Оплачьте утрату и повернитесь к тому, что осталось.','Простите и отпустите прошлое.'],
+  [['Ностальгия','Невинность','Память'],'Тёплые воспоминания, доброта, связь с прошлым.','Застревание в прошлом, идеализация.','Черпайте тепло из прошлого, живя сейчас.','Отпустите то, что было.'],
+  [['Иллюзии','Выбор','Мечты'],'Множество вариантов и фантазий — легко потеряться.','Ясность, отрезвление, конкретный выбор.','Отделите мечту от реального пути.','Сделайте один реальный шаг.'],
+  [['Уход','Поиск','Перемена'],'Вы оставляете то, что больше не наполняет, ради большего.','Страх перемен, возврат к старому.','Идите за тем, что питает душу.','Не бойтесь оставить привычное.'],
+  [['Удовлетворение','Желание','Уют'],'Исполнение желаний, эмоциональное удовлетворение.','Пресыщение, поверхностные желания.','Наслаждайтесь — вы это заслужили.','Загляните глубже своих желаний.'],
+  [['Счастье','Семья','Полнота'],'Эмоциональная гармония, счастье в любви и семье.','Разлад в семье, неидеальная идиллия.','Берегите то, что построили вместе.','Восстановите тепло в близких связях.'],
+  [['Мечтатель','Послание','Чуткость'],'Нежное послание, творческая мечтательность, новые чувства.','Обидчивость, незрелые эмоции, эскапизм.','Доверяйте интуиции и творчеству.','Взрослейте в чувствах.'],
+  [['Романтик','Предложение','Идеал'],'Романтик с предложением, следует за сердцем и красотой.','Иллюзии, непостоянство, разочарование.','Следуйте за сердцем разумно.','Отличайте идеал от реальности.'],
+  [['Сострадание','Интуиция','Забота'],'Глубоко чувствующая, заботливая, интуитивная натура.','Эмоциональная зависимость, жертвенность.','Заботьтесь о других, не теряя себя.','Поставьте свои чувства тоже в счёт.'],
+  [['Зрелость','Дипломатия','Спокойствие'],'Эмоционально зрелый, уравновешенный, мудрый сердцем.','Подавленные чувства, манипуляции, холод.','Ведите из спокойствия и сострадания.','Позвольте себе чувствовать открыто.'],
+ ],
+ swords:[
+  [['Ясность','Истина','Прорыв'],'Прорыв ясности, острая мысль, момент истины.','Путаница, жестокие слова, неверные выводы.','Назовите правду прямо.','Проверьте факты, прежде чем рубить.'],
+  [['Тупик','Выбор','Равновесие'],'Трудный выбор: вы взвешиваете и медлите с закрытыми глазами.','Сдвиг с мёртвой точки, прозрение.','Снимите повязку и решите.','Хватит избегать — выберите.'],
+  [['Боль','Разрыв','Печаль'],'Сердечная боль, разрыв, горькая правда.','Исцеление, прощение, выход из боли.','Проживите боль, чтобы исцелиться.','Отпустите обиду — она ранит вас.'],
+  [['Отдых','Пауза','Восстановление'],'Необходимая пауза, отдых и восстановление сил.','Беспокойство, выгорание, нужно остановиться.','Позвольте себе передышку.','Остановитесь, пока не поздно.'],
+  [['Конфликт','Цена победы','Гордыня'],'Конфликт с потерями, победа ценой отношений.','Примирение, готовность отступить.','Спросите: чего стоит эта победа?','Сделайте шаг к миру.'],
+  [['Переход','Движение','Спокойствие'],'Переход к спокойным водам, трудности остаются позади.','Застревание, груз прошлого, нежелание двигаться.','Двигайтесь к лучшему берегу.','Решитесь наконец отплыть.'],
+  [['Стратегия','Хитрость','Уловка'],'Хитрый план, действие в обход, осторожность.','Разоблачение, отказ от обмана, признание.','Действуйте умно, но честно.','Перестаньте хитрить — это вскроется.'],
+  [['Ограничение','Ловушка ума','Бессилие'],'Ощущение ловушки — но путы созданы вашими мыслями.','Освобождение, прозрение, выход.','Поймите: выход всегда был рядом.','Сделайте первый шаг к свободе.'],
+  [['Тревога','Бессонница','Страх'],'Тревога и ночные страхи: мысли мучают сильнее реальности.','Облегчение, рассеивание страхов, рассвет.','Назовите страх — он уменьшится.','Утро ближе, чем кажется.'],
+  [['Завершение','Дно','Перезапуск'],'Болезненный конец, дно — но дальше только вверх.','Восстановление, медленное возрождение.','Примите конец, чтобы начать заново.','Худшее позади — поднимайтесь.'],
+  [['Любопытство','Бдительность','Идеи'],'Острый ум, любопытство, готовность учиться и наблюдать.','Сплетни, поспешность, колкость.','Задавайте вопросы и наблюдайте.','Думайте, прежде чем говорить.'],
+  [['Напор','Решимость','Скорость'],'Стремительный, прямой, рвётся к цели с напором.','Агрессия, безрассудство, грубость.','Идите к цели прямо, не сметая всех.','Сбавьте напор и подумайте.'],
+  [['Ясность','Независимость','Честность'],'Острый ум, прямота, независимость и честность.','Холодность, резкость, обида.','Говорите правду ясно и тактично.','Смягчите остроту состраданием.'],
+  [['Логика','Авторитет','Истина'],'Зрелый интеллект, справедливость, ясные принципы.','Тирания ума, манипуляция, бесчувственность.','Судите по истине и справедливости.','Добавьте к логике сердце.'],
+ ],
+ pents:[
+  [['Возможность','Достаток','Семя'],'Материальная возможность, новое начало в деньгах или деле.','Упущенный шанс, страх вложений.','Используйте конкретную возможность.','Оцените риски, но не упустите момент.'],
+  [['Баланс','Жонглирование','Гибкость'],'Баланс между делами и деньгами, гибкость и адаптивность.','Перегруз, потеря равновесия, хаос.','Расставьте приоритеты.','Сбросьте часть нагрузки.'],
+  [['Мастерство','Команда','Качество'],'Признанное мастерство, плодотворное сотрудничество.','Несогласованность, посредственность.','Работайте в команде на качество.','Подтяните навыки и согласие.'],
+  [['Стабильность','Контроль','Удержание'],'Финансовая стабильность, но склонность держать слишком крепко.','Ослабление контроля, щедрость или потеря.','Берегите ресурсы, но не зажимайтесь.','Разожмите хватку, дайте потоку идти.'],
+  [['Нужда','Потеря','Испытание'],'Временные трудности, чувство нехватки и изоляции.','Восстановление, помощь приходит, выход из кризиса.','Просите о помощи — она рядом.','Худшее проходит, поддержка близко.'],
+  [['Щедрость','Обмен','Баланс'],'Справедливый обмен, помощь, баланс давать и брать.','Неравенство, долги, корысть в дарении.','Давайте и принимайте по справедливости.','Проверьте баланс отдачи и получения.'],
+  [['Терпение','Урожай','Оценка'],'Пауза для оценки роста, терпеливое ожидание плодов.','Нетерпение, сомнения в вложениях.','Дайте посеянному время вызреть.','Пересмотрите, куда вкладываете силы.'],
+  [['Усердие','Навык','Труд'],'Кропотливый труд, оттачивание мастерства, преданность делу.','Перфекционизм, рутина без смысла.','Вкладывайтесь в мастерство шаг за шагом.','Найдите смысл в труде или смените курс.'],
+  [['Достаток','Независимость','Награда'],'Заслуженное изобилие, самодостаточность и комфорт.','Зависимость, показной достаток, одиночество.','Наслаждайтесь плодами труда.','Истинное богатство не только в вещах.'],
+  [['Богатство','Наследие','Семья'],'Прочное благополучие, наследие, стабильность рода.','Финансовые споры, нестабильность наследия.','Стройте долгосрочную опору для близких.','Укрепите финансовый фундамент.'],
+  [['Обучение','Цель','Перспектива'],'Жажда учиться, новые планы, перспективная возможность.','Откладывание, нереалистичные планы.','Учитесь и закладывайте основу.','От слов переходите к делу.'],
+  [['Надёжность','Труд','Методичность'],'Надёжный, методичный, доводит дело до конца.','Застой, скука, чрезмерная осторожность.','Двигайтесь к цели стабильно.','Добавьте гибкости в рутину.'],
+  [['Забота','Достаток','Практичность'],'Практичная, заботливая, создаёт уют и достаток.','Гиперопека, материализм, забывание себя.','Заботьтесь о теле, доме и близких.','Уделите время и себе тоже.'],
+  [['Успех','Надёжность','Изобилие'],'Зрелый успех, финансовая мудрость, щедрость и опора.','Жадность, упрямство, одержимость статусом.','Управляйте ресурсами мудро и щедро.','Не позволяйте деньгам управлять вами.'],
+ ],
+};
+const MINOR=[];
+SUITS.forEach(su=>{
+  MV[su.key].forEach((m,i)=>{
+    MINOR.push({
+      minor:true, suit:su.nm, suitGen:su.gen, suitKey:su.key,
+      n:su.sym, sym:su.sym, rank:RANKS[i],
+      name:RANKS[i]+' '+su.gen, el:su.el, pl:'—',
+      th:m[0], up:m[1], rev:m[2], au:m[3], ar:m[4]
+    });
+  });
+});
+const DECK78=A.concat(MINOR);
+window.MINOR=MINOR; window.DECK78=DECK78;
+
+function todaySeed(salt){const d=new Date();return((d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())*13+salt)>>>0;}
+function rngFrom(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function draw(n,salt,fresh){
+  const deck=has('minor')?DECK78:A;
+  const seed=fresh?(Math.random()*1e9|0):todaySeed(salt);
+  const r=rngFrom(seed);
+  const idx=deck.map((_,i)=>i);
+  for(let i=idx.length-1;i>0;i--){const j=Math.floor(r()*(i+1));const t=idx[i];idx[i]=idx[j];idx[j]=t;}
+  return idx.slice(0,n).map(i=>({card:deck[i],rev:r()<0.32}));
+}
+
+function arcLabel(c){return c.minor?('Младший · '+c.suit):'Старший Аркан';}
+
+function loadHist(){try{return JSON.parse(localStorage.getItem('arc_hist')||'[]');}catch(e){return [];}}
+function logHist(type,title){
+  if(!has('history'))return;
+  const h=loadHist();
+  h.unshift({type,title,ts:Date.now()});
+  localStorage.setItem('arc_hist',JSON.stringify(h.slice(0,300)));
+}
+const HTYPE={day:'🃏 Карта дня',three:'🔮 Три карты',celtic:'✜ Кельтский крест',num:'🔢 Нумерология',matrix:'⭕ Матрица судьбы'};
+
+const css=`
+.spread-bar{overflow-x:auto;scrollbar-width:none}
+.spread-bar::-webkit-scrollbar{display:none}
+.spread-bar .sptab{flex:1 0 auto;white-space:nowrap;min-width:96px}
+.paywall{position:relative;text-align:center;background:var(--s1);border:1px solid var(--line);
+  border-radius:var(--r);margin:16px;padding:34px 24px 28px;overflow:hidden}
+.pw-glow{position:absolute;top:-50px;left:50%;transform:translateX(-50%);width:200px;height:200px;
+  background:radial-gradient(circle,rgba(75,94,255,.16) 0%,transparent 70%);pointer-events:none}
+.pw-ic{font-size:38px;margin-bottom:10px}
+.pw-pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:1px;border-radius:20px;
+  padding:4px 12px;margin-bottom:12px}
+.pw-pill.pro{background:rgba(75,94,255,.15);color:var(--accent2);border:1px solid rgba(75,94,255,.3)}
+.pw-pill.premium{background:rgba(200,169,110,.12);color:var(--gold2);border:1px solid rgba(200,169,110,.3)}
+.pw-t{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;margin-bottom:8px}
+.pw-d{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:20px;font-weight:500}
+.mi-lock{font-size:10px;background:rgba(75,94,255,.15);color:var(--accent2);border-radius:4px;
+  padding:2px 8px;font-weight:700;margin-left:8px;letter-spacing:.3px}
+.mi-lock.premium{background:rgba(200,169,110,.12);color:var(--gold2)}
+.sub-bar{display:flex;align-items:center;gap:12px;padding:46px 18px 14px;position:sticky;top:0;
+  background:rgba(13,14,28,.92);backdrop-filter:blur(16px);z-index:10;border-bottom:1px solid var(--line)}
+.sub-back{width:38px;height:38px;border-radius:11px;background:var(--s1);border:1px solid var(--line);
+  color:var(--text);font-size:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.sub-h1{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;line-height:1.1}
+.cc-shuf{display:flex;justify-content:flex-end;padding:8px 16px 0}
+.cc-shuf button{background:var(--s1);border:1px solid var(--line2);color:var(--accent2);
+  font-family:'Inter';font-size:12px;font-weight:600;border-radius:10px;padding:8px 14px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+.cc-board{display:flex;gap:14px;padding:14px 16px 4px;align-items:flex-start}
+.cc-cross{position:relative;width:188px;height:262px;flex-shrink:0}
+.cc-staff{flex:1;display:flex;flex-direction:column;gap:8px}
+.cc-cell{position:absolute;width:60px;height:90px;border-radius:9px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform .15s}
+.cc-cell:active{transform:scale(.95)}
+.cc-cell.p1{left:64px;top:86px;z-index:2}
+.cc-cell.p2{left:64px;top:86px;z-index:3;transform:rotate(90deg)}
+.cc-cell.p2:active{transform:rotate(90deg) scale(.95)}
+.cc-cell.p3{left:64px;top:172px}
+.cc-cell.p4{left:0;top:86px}
+.cc-cell.p5{left:64px;top:0}
+.cc-cell.p6{left:128px;top:86px}
+.cc-mini,.st-mini{background:linear-gradient(150deg,#2D3580,#151840);border:1px solid rgba(123,143,255,.35);
+  border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;
+  overflow:hidden;position:relative}
+.cc-mini.rev .ccm-sym{transform:rotate(180deg)}
+.cc-mini.sel,.st-mini.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 6px 18px rgba(200,169,110,.25)}
+.ccm-num{position:absolute;top:3px;left:5px;font-size:8px;color:rgba(200,169,110,.8);font-weight:700}
+.ccm-sym{font-size:22px;line-height:1}
+.st-row{display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.st-mini{width:42px;height:62px;flex-shrink:0}
+.st-mini .ccm-sym{font-size:18px}
+.st-txt{min-width:0}
+.st-pos{font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);font-weight:700}
+.st-nm{font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-star{position:relative;width:300px;height:300px;margin:8px auto 4px}
+.ms-line{position:absolute;left:50%;top:50%;width:230px;height:1px;background:var(--line2);
+  transform-origin:left center}
+.ms-pt{position:absolute;width:54px;height:54px;border-radius:50%;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--s2);border:1px solid var(--line2);-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.ms-pt:active{transform:translate(-50%,-50%) scale(.92)}
+.ms-pt.center{width:74px;height:74px;background:linear-gradient(140deg,#3D2F80,#1A1C50);
+  border:1px solid rgba(200,169,110,.4)}
+.ms-pt.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 18px rgba(200,169,110,.3)}
+.ms-v{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:var(--gold2);line-height:1}
+.ms-pt.center .ms-v{font-size:30px}
+.ms-l{font-size:7px;letter-spacing:.4px;text-transform:uppercase;color:var(--dim);font-weight:700;margin-top:1px}
+.ms-leg{font-size:11px;color:var(--dim);text-align:center;padding:0 24px 4px;line-height:1.6;font-weight:500}
+.cmp-score{text-align:center;margin:4px 16px 12px;background:var(--s1);border:1px solid var(--line);
+  border-radius:var(--r);padding:24px 20px;position:relative;overflow:hidden}
+.cmp-pct{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold2);line-height:1}
+.cmp-bar{height:8px;border-radius:8px;background:var(--s3);overflow:hidden;margin:14px 0 6px}
+.cmp-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--gold))}
+.cmp-cap{font-size:12px;color:var(--dim);font-weight:600}
+.hor-top{text-align:center;padding:8px 16px 4px}
+.hor-sign{font-size:54px;line-height:1;margin-bottom:6px}
+.hor-name{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500}
+.hor-date{font-size:12px;color:var(--dim);font-weight:500;margin-top:2px}
+`;
+const st=document.createElement('style');st.id='arc-addon-css';st.textContent=css;document.head.appendChild(st);
+
+const nres=document.getElementById('nresult');
+if(nres){
+  const anchor=document.getElementById('dn').parentElement;
+  anchor.insertAdjacentHTML('afterend',
+    `<div class="block fi" id="b-dlp"><div class="blbl-g">Жизненный путь</div><p class="msg-t" id="dlp"></p></div>
+     <div class="block fi" id="b-dm"><div class="blbl-g">Число зрелости</div><p class="msg-t" id="dm"></p></div>
+     <div id="num-lock"></div>`);
+}
+
+const content=document.getElementById('content');
+function subBar(title,back){return `<div class="sub-bar"><button class="sub-back" onclick="goTab('${back}')">←</button><div class="sub-h1">${title}</div></div>`;}
+content.insertAdjacentHTML('beforeend',`
+<div class="page" id="page-matrix">
+  ${subBar('<em style="font-style:italic;color:var(--gold2)">Матрица</em> судьбы','profile')}
+  <div id="matrix-body"></div>
+</div>
+<div class="page" id="page-history">
+  ${subBar('<em style="font-style:italic;color:var(--gold2)">История</em> раскладов','profile')}
+  <div id="history-body"></div>
+</div>
+<div class="page" id="page-horoscope2">
+  ${subBar('<em style="font-style:italic;color:var(--gold2)">Гороскоп</em>','profile')}
+  <div id="horoscope-body"></div>
+</div>
+<div class="page" id="page-compat2">
+  ${subBar('<em style="font-style:italic;color:var(--gold2)">Совместимость</em>','profile')}
+  <div id="compat-body"></div>
+</div>`);
+
+const menu=document.querySelector('#page-profile .menu-block');
+if(menu){
+  menu.innerHTML=`
+   <div class="mi" onclick="goTab('subscription')">
+     <div class="mi-l"><div class="mi-ic">♦</div><div><div class="mi-t">Подписка <span class="mi-badge" id="m-plan-badge">Базовый</span></div><div class="mi-s">Управление тарифом</div></div></div>
+     <div class="mi-chevron">›</div></div>
+   <div class="mi" onclick="openMatrix()">
+     <div class="mi-l"><div class="mi-ic">⭕</div><div><div class="mi-t">Матрица судьбы <span class="mi-lock" data-f="matrix"></span></div><div class="mi-s">Числовая карта личности</div></div></div>
+     <div class="mi-chevron">›</div></div>
+   <div class="mi" onclick="openHistory()">
+     <div class="mi-l"><div class="mi-ic">📅</div><div><div class="mi-t">История раскладов <span class="mi-lock" data-f="history"></span></div><div class="mi-s">Ваши прошлые карты и расчёты</div></div></div>
+     <div class="mi-chevron">›</div></div>
+   <div class="mi" onclick="openHoroscope()">
+     <div class="mi-l"><div class="mi-ic">♒</div><div><div class="mi-t">Персональный гороскоп <span class="mi-lock premium" data-f="horoscope"></span></div><div class="mi-s">На основе вашей даты рождения</div></div></div>
+     <div class="mi-chevron">›</div></div>
+   <div class="mi" onclick="openCompat()">
+     <div class="mi-l"><div class="mi-ic">💞</div><div><div class="mi-t">Совместимость по числам <span class="mi-lock premium" data-f="compat"></span></div><div class="mi-s">Сравнить две даты и имени</div></div></div>
+     <div class="mi-chevron">›</div></div>
+   <div class="mi" onclick="goTab('numerology');fillProf()">
+     <div class="mi-l"><div class="mi-ic">🔢</div><div><div class="mi-t">Моя нумерология</div><div class="mi-s">Рассчитать по профилю</div></div></div>
+     <div class="mi-chevron">›</div></div>`;
+}
+
+function refreshLocks(){
+  document.querySelectorAll('.mi-lock').forEach(el=>{
+    const f=el.getAttribute('data-f');
+    if(has(f)){el.style.display='none';}
+    else{el.style.display='';el.textContent=FEATURES[f]==='premium'?'PREMIUM':'PRO';}
+  });
+}
+
+function openPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  content.scrollTop=0;
+}
+window.openMatrix=function(){openPage('page-matrix');renderMatrix();};
+window.openHistory=function(){openPage('page-history');renderHistory();};
+window.openHoroscope=function(){openPage('page-horoscope2');renderHoroscope();};
+window.openCompat=function(){openPage('page-compat2');renderCompat();};
+
+function detailHTML(card,rev,posLabel){
+  return `<div class="msg-block fi">
+    ${posLabel?`<div class="msg-lbl g">${posLabel}</div>`:''}
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+      <div style="font-size:44px;line-height:1;${rev?'transform:rotate(180deg)':''}">${card.sym}</div>
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;margin-bottom:4px">${card.name}</div>
+        <span class="orient-badge ${rev?'rev':'up'}" style="font-size:10px;padding:3px 10px;margin-top:0">${rev?'↓ Перевёрнутая':'↑ Прямая'}</span>
+      </div>
+    </div>
+    <div class="tag-row" style="justify-content:flex-start;margin:0 0 12px">${card.th.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="attr-row" style="margin:0 0 14px">
+      <div class="attr"><div class="attr-lbl">Стихия</div><div class="attr-val">${card.el}</div></div>
+      <div class="attr"><div class="attr-lbl">Аркан</div><div class="attr-val" style="font-size:11px">${arcLabel(card)}</div></div>
+      <div class="attr"><div class="attr-lbl">${card.minor?'Ранг':'Число'}</div><div class="attr-val" style="font-size:11px">${card.minor?card.rank:card.n}</div></div>
+    </div>
+    <p class="msg-t"><strong>${rev?'Перевёрнутая:':'Прямая:'}</strong> ${rev?card.rev:card.up}</p>
+    <div class="sep"></div>
+    <div class="msg-lbl a">Совет</div>
+    <p class="msg-t">${rev?card.ar:card.au}</p>
+  </div>`;
+}
+
+setSpread=function(t,btn){
+  document.querySelectorAll('#page-tarot .sptab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('sp-day').style.display=t==='day'?'block':'none';
+  document.getElementById('sp-three').classList.toggle('hidden',t!=='three');
+  document.getElementById('sp-celtic').classList.toggle('hidden',t!=='celtic');
+  if(t==='three')renderThree();
+  if(t==='celtic')renderCeltic();
+};
+
+const T3Px=['Прошлое','Настоящее','Будущее'];
+window._t3=[];
+function renderThree(fresh){
+  const wrap=document.getElementById('sp-three');
+  if(!has('three')){
+    wrap.innerHTML=paywall('three','Расклад «Три карты»','Прошлое · Настоящее · Будущее. Полная колода из 78 арканов.');
+    return;
+  }
+  window._t3=draw(3,101,fresh);
+  wrap.innerHTML=`
+    <div class="cc-shuf"><button onclick="renderThree(true)">⟳ Перетасовать</button></div>
+    <div class="t3-grid" id="t3grid2">${window._t3.map((t,i)=>`
+      <div class="t3slot" onclick="showT3x(${i})" id="t3sx${i}">
+        <div class="t3card"><div class="t3sym" style="${t.rev?'transform:rotate(180deg)':''}">${t.card.sym}</div><div class="t3n">${t.card.name}</div></div>
+        <div class="t3lbl">${T3Px[i]}</div>
+      </div>`).join('')}</div>
+    <div id="t3detail2"></div><div style="height:32px"></div>`;
+  if(!fresh)logHist('three','Расклад «Три карты»');
+}
+window.renderThree=renderThree;
+window.showT3x=function(i){
+  document.querySelectorAll('#sp-three .t3slot').forEach((e,j)=>e.classList.toggle('sel',j===i));
+  const t=window._t3[i];
+  const d=document.getElementById('t3detail2');
+  d.innerHTML=detailHTML(t.card,t.rev,T3Px[i]);
+  setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+};
+
+const CCP=['Настоящее — суть ситуации','Вызов — что мешает или помогает','Основа — корни, прошлый опыт',
+  'Прошлое — что уходит','Цель — к чему всё идёт','Будущее — ближайший шаг',
+  'Вы — ваша позиция','Окружение — влияние людей','Надежды и страхи','Итог — вероятный исход'];
+window._cc2=[];
+function renderCeltic(fresh){
+  const wrap=document.getElementById('sp-celtic');
+  if(!has('celtic')){
+    wrap.innerHTML=paywall('celtic','Расклад «Кельтский крест»','Классический расклад из 10 позиций. Самый глубокий разбор ситуации.');
+    return;
+  }
+  window._cc2=draw(10,202,fresh);
+  const mini=(t,i,cls)=>`<div class="cc-cell ${cls}" onclick="showCC2(${i})" id="cc2${i}">
+      <div class="cc-mini ${t.rev?'rev':''}" id="ccm2${i}"><span class="ccm-num">${i+1}</span><span class="ccm-sym">${t.card.sym}</span></div></div>`;
+  const staff=[6,7,8,9].map(i=>{const t=window._cc2[i];return `
+      <div class="st-row" onclick="showCC2(${i})" id="ccs2${i}">
+        <div class="st-mini ${t.rev?'rev':''}"><span class="ccm-num">${i+1}</span><span class="ccm-sym" style="${t.rev?'transform:rotate(180deg)':''}">${t.card.sym}</span></div>
+        <div class="st-txt"><div class="st-pos">${i+1} · ${CCP[i].split('—')[0].trim()}</div><div class="st-nm">${t.card.name}</div></div>
+      </div>`;}).join('');
+  wrap.innerHTML=`
+    <div class="cc-shuf"><button onclick="renderCeltic(true)">⟳ Перетасовать</button></div>
+    <div class="cc-board">
+      <div class="cc-cross">
+        ${mini(window._cc2[0],0,'p1')}${mini(window._cc2[1],1,'p2')}${mini(window._cc2[2],2,'p3')}
+        ${mini(window._cc2[3],3,'p4')}${mini(window._cc2[4],4,'p5')}${mini(window._cc2[5],5,'p6')}
+      </div>
+      <div class="cc-staff">${staff}</div>
+    </div>
+    <div id="ccdetail2" style="padding:0 0 4px"></div><div style="height:32px"></div>`;
+  if(!fresh)logHist('celtic','Расклад «Кельтский крест»');
+}
+window.renderCeltic=renderCeltic;
+window.showCC2=function(i){
+  document.querySelectorAll('#sp-celtic .cc-mini,#sp-celtic .st-mini').forEach(e=>e.classList.remove('sel'));
+  const m=document.getElementById('ccm2'+i);if(m)m.classList.add('sel');
+  const s=document.querySelector('#ccs2'+i+' .st-mini');if(s)s.classList.add('sel');
+  const t=window._cc2[i];
+  const d=document.getElementById('ccdetail2');
+  d.innerHTML=detailHTML(t.card,t.rev,(i+1)+' · '+CCP[i]);
+  setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+};
+
+calcNum=function(){
+  const date=document.getElementById('bdate').value;
+  const name=document.getElementById('fname').value.trim();
+  if(!date){toast('Введите дату рождения');return;}
+  if(!name||!/[а-яёА-ЯЁ]/.test(name)){toast('Введите имя по-русски');return;}
+  const d=dNum(date),s=sNum(name),p=pNum(name),n=nNum(name),lp=dNum(date),m=mNum(date,name);
+  document.getElementById('r-d').textContent=d;
+  document.getElementById('r-s').textContent=s;
+  document.getElementById('r-p').textContent=p;
+  document.getElementById('r-n').textContent=n;
+  const dm=NM[d]||NM[9],sm=NM[s]||NM[9],pm=NM[p]||NM[9],nm=NM[n]||NM[9];
+  document.getElementById('dd').innerHTML=`<strong>${dm.t}</strong><br><br>${dm.d}`;
+  document.getElementById('ds').innerHTML=`<strong>${sm.t}</strong><br><br>${sm.d}`;
+  document.getElementById('dp').innerHTML=`<strong>${pm.t}</strong><br><br>${pm.d}`;
+  document.getElementById('dn').innerHTML=`<strong>${nm.t}</strong><br><br>${nm.d}`;
+  const full=has('num6');
+  document.getElementById('r-lp').textContent=full?lp:'•';
+  document.getElementById('r-m').textContent=full?m:'•';
+  const bdlp=document.getElementById('b-dlp');const bdm=document.getElementById('b-dm');
+  if(bdlp)bdlp.style.display=full?'':'none';
+  if(bdm)bdm.style.display=full?'':'none';
+  const lockBox=document.getElementById('num-lock');
+  if(full){
+    const lm=NM[lp]||NM[9],mm=NM[m]||NM[9];
+    const dlp=document.getElementById('dlp');const dmd=document.getElementById('dm');
+    if(dlp)dlp.innerHTML=`<strong>${lm.t}</strong><br><br>${lm.d}`;
+    if(dmd)dmd.innerHTML=`<strong>${mm.t}</strong><br><br>${mm.d}`;
+    if(lockBox)lockBox.innerHTML='';
+  }else{
+    if(lockBox)lockBox.innerHTML=paywall('num6','Ещё 2 числа судьбы','Жизненный путь и Число зрелости доступны в Arcana Pro.');
+  }
+  document.getElementById('nform').classList.add('hidden');
+  document.getElementById('nresult').classList.remove('hidden');
+  S.stats.calcs++;saveStats();
+  logHist('num','Нумерология · число судьбы '+d);
+  content.scrollTop=0;
+};
+
+function r22(n){while(n>22)n=String(n).split('').reduce((a,x)=>a+(+x),0);return n;}
+function arcByNum(k){return A[(k%22+22)%22];}
+window._mx=null;
+function renderMatrix(){
+  const body=document.getElementById('matrix-body');
+  if(!has('matrix')){
+    body.innerHTML=paywall('matrix','Матрица судьбы','Восьмиконечная звезда из 22 Арканов по вашей дате рождения.');
+    return;
+  }
+  const bd=(S.prof&&S.prof.bdate)||'';
+  body.innerHTML=`
+    <div class="block">
+      <div class="blbl">Дата рождения</div>
+      <div class="field" style="margin-bottom:16px"><input type="date" id="mx-date" value="${bd}"/></div>
+      <button class="btn btn-a" onclick="calcMatrix()">Построить матрицу ✦</button>
+    </div>
+    <div id="mx-out"></div>`;
+  if(bd)calcMatrix();
+}
+window.renderMatrix=renderMatrix;
+window.calcMatrix=function(){
+  const v=document.getElementById('mx-date').value;
+  if(!v){toast('Укажите дату рождения');return;}
+  const [Y,M,D]=v.split('-').map(x=>parseInt(x,10));
+  const a=r22(D),b=r22(M),c=r22(String(Y).split('').reduce((s,x)=>s+(+x),0));
+  const d=r22(a+b+c),e=r22(a+b+c+d);
+  const f=r22(a+b),g=r22(b+c),h=r22(c+d),i=r22(d+a);
+  const purpose=r22(c+d);
+  window._mx={a,b,c,d,e,f,g,h,i,purpose};
+  const PTS=[
+    {k:'a',l:'День',x:50,y:96},{k:'b',l:'Месяц',x:50,y:4},
+    {k:'c',l:'Год',x:96,y:50},{k:'d',l:'Сумма',x:4,y:50},
+    {k:'f',l:'Талант',x:81,y:19},{k:'g',l:'Род',x:81,y:81},
+    {k:'h',l:'Карма',x:19,y:81},{k:'i',l:'Дар',x:19,y:19},
+  ];
+  const lines=[0,45,90,135].map(deg=>`<div class="ms-line" style="transform:translate(-1px,-1px) rotate(${deg}deg)"></div>`).join('');
+  const pts=PTS.map(p=>`<div class="ms-pt" style="left:${p.x}%;top:${p.y}%" onclick="showMx('${p.k}','${p.l}')" data-k="${p.k}">
+      <span class="ms-v">${window._mx[p.k]}</span><span class="ms-l">${p.l}</span></div>`).join('');
+  document.getElementById('mx-out').innerHTML=`
+    <div class="ms-star">${lines}${pts}
+      <div class="ms-pt center" style="left:50%;top:50%" onclick="showMx('e','Сущность')" data-k="e">
+        <span class="ms-v">${e}</span><span class="ms-l">Сущность</span></div>
+    </div>
+    <p class="ms-leg">Нажмите на любую точку, чтобы прочитать энергию Аркана</p>
+    <div class="block fi" style="background:rgba(200,169,110,.05);border-color:rgba(200,169,110,.2)">
+      <div class="blbl-g">Главное предназначение · Аркан ${purpose}</div>
+      <p class="msg-t"><strong>${arcByNum(purpose).name}.</strong> ${arcByNum(purpose).up}</p>
+    </div>
+    <div id="mx-detail"></div><div style="height:32px"></div>`;
+  logHist('matrix','Матрица судьбы · сущность '+e);
+};
+window.showMx=function(k,label){
+  document.querySelectorAll('#page-matrix .ms-pt').forEach(e=>e.classList.toggle('sel',e.getAttribute('data-k')===k));
+  const num=window._mx[k];const c=arcByNum(num);
+  document.getElementById('mx-detail').innerHTML=`
+    <div class="block fi">
+      <div class="blbl-a">${label} · Аркан ${num}</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div style="font-size:40px">${c.sym}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500">${c.name}</div></div>
+      <p class="msg-t">${c.up}</p>
+      <div class="sep"></div>
+      <div class="msg-lbl g">Как проявлять</div>
+      <p class="msg-t">${c.au}</p>
+    </div>`;
+  const el=document.getElementById('mx-detail');setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+};
+
+function renderHistory(){
+  const body=document.getElementById('history-body');
+  if(!has('history')){
+    body.innerHTML=paywall('history','История раскладов','Сохраняйте карты дня, расклады и расчёты.');
+    return;
+  }
+  let h=loadHist();
+  const lim=S.plan==='premium'?Infinity:30*86400000;
+  const now=Date.now();
+  h=h.filter(x=>now-x.ts<=lim);
+  if(!h.length){
+    body.innerHTML=`<div class="block" style="text-align:center;color:var(--dim);padding:32px 20px">
+      Пока пусто. Откройте карту дня или сделайте расклад.</div>`;
+    return;
+  }
+  const fmt=ts=>new Date(ts).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  body.innerHTML=`<div class="menu-block" style="margin-top:8px">${h.map(x=>`
+    <div class="mi" style="cursor:default">
+      <div class="mi-l"><div class="mi-ic">${(HTYPE[x.type]||'✦').split(' ')[0]}</div>
+        <div><div class="mi-t">${x.title}</div><div class="mi-s">${fmt(x.ts)}</div></div></div>
+    </div>`).join('')}</div>
+    ${S.plan!=='premium'?`<p style="text-align:center;font-size:11px;color:var(--dim);padding:0 24px 24px;line-height:1.7">Показаны записи за 30 дней. В Premium — без ограничений.</p>`:'<div style="height:24px"></div>'}`;
+}
+window.renderHistory=renderHistory;
+
+const ZOD=[['Козерог','♑',1,19],['Водолей','♒',2,18],['Рыбы','♓',3,20],['Овен','♈',4,19],
+  ['Телец','♉',5,20],['Близнецы','♊',6,20],['Рак','♋',7,22],['Лев','♌',8,22],
+  ['Дева','♍',9,22],['Весы','♎',10,22],['Скорпион','♏',11,21],['Стрелец','♐',12,21]];
+function zodiac(m,d){const z=ZOD[m-1];return d<=z[3]?(m===1?['Козерог','♑']:[ZOD[(m+10)%12][0],ZOD[(m+10)%12][1]]):[z[0],z[1]];}
+function renderHoroscope(){
+  const body=document.getElementById('horoscope-body');
+  if(!has('horoscope')){
+    body.innerHTML=paywall('horoscope','Персональный гороскоп','Ежедневный прогноз по вашему знаку. Доступно в Arcana Premium.');
+    return;
+  }
+  const bd=(S.prof&&S.prof.bdate)||'';
+  if(!bd){
+    body.innerHTML=`<div class="block" style="text-align:center;color:var(--dim);padding:28px 20px">
+      Укажите дату рождения в профиле.
+      <button class="btn btn-a" style="margin-top:16px" onclick="goTab('profile')">К профилю</button></div>`;
+    return;
+  }
+  const [Y,M,D]=bd.split('-').map(x=>parseInt(x,10));
+  const [zn,zs]=zodiac(M,D);
+  const day=A[(new Date().getFullYear()*10000+(new Date().getMonth()+1)*100+new Date().getDate())%A.length];
+  const today=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  body.innerHTML=`
+    <div class="hor-top"><div class="hor-sign">${zs}</div><div class="hor-name">${zn}</div><div class="hor-date">${today}</div></div>
+    <div class="block fi"><div class="blbl-a">Энергия дня · ${day.name}</div>
+      <p class="msg-t">${day.up}</p></div>
+    <div class="block fi"><div class="blbl-g">Совет на сегодня</div>
+      <p class="msg-t">${day.au} Знак ${zn} сегодня особенно чувствует тему «${day.th[0].toLowerCase()}» — используйте это.</p></div>
+    <div style="height:32px"></div>`;
+}
+window.renderHoroscope=renderHoroscope;
+
+function renderCompat(){
+  const body=document.getElementById('compat-body');
+  if(!has('compat')){
+    body.innerHTML=paywall('compat','Совместимость по числам','Сравните две даты рождения. Доступно в Arcana Premium.');
+    return;
+  }
+  body.innerHTML=`
+    <div class="block">
+      <div class="blbl">Первый человек</div>
+      <div class="field"><input type="date" id="c1d" value="${(S.prof&&S.prof.bdate)||''}"/></div>
+      <div class="blbl" style="margin-top:8px">Второй человек</div>
+      <div class="field" style="margin-bottom:16px"><input type="date" id="c2d"/></div>
+      <button class="btn btn-a" onclick="calcCompat2()">Рассчитать совместимость ✦</button>
+    </div>
+    <div id="c-out2"></div>`;
+}
+window.renderCompat=renderCompat;
+window.calcCompat2=function(){
+  const v1=document.getElementById('c1d').value,v2=document.getElementById('c2d').value;
+  if(!v1||!v2){toast('Укажите обе даты');return;}
+  const a=dNum(v1),b=dNum(v2);
+  const diff=Math.abs(a-b);
+  const base=a===b?92:[0,1,2].includes(diff)?78:[3,4].includes(diff)?64:[5,6].includes(diff)?52:46;
+  const pct=Math.min(98,Math.max(40,base+((a*b)%9)));
+  let cap='Гармоничная пара',txt='Ваши числа резонируют: вы легко понимаете ритмы друг друга.';
+  if(pct<55){cap='Союз роста';txt='Разные энергии: вместе вы учитесь и дополняете друг друга.';}
+  else if(pct<72){cap='Тёплая совместимость';txt='Крепкая основа при взаимном уважении различий.';}
+  const am=NM[a]||NM[9],bm=NM[b]||NM[9];
+  document.getElementById('c-out2').innerHTML=`
+    <div class="cmp-score fi"><div class="pw-glow"></div>
+      <div class="cmp-pct">${pct}%</div>
+      <div class="cmp-bar"><div class="cmp-fill" style="width:${pct}%"></div></div>
+      <div class="cmp-cap">${cap}</div></div>
+    <div class="block fi"><div class="blbl-a">Числа судьбы: ${a} и ${b}</div>
+      <p class="msg-t"><strong>${am.t}</strong> и <strong>${bm.t}</strong>. ${txt}</p></div>
+    <div style="height:32px"></div>`;
+};
+
+const _reveal=revealCard;
+revealCard=function(){
+  const was=S.revealed;
+  _reveal();
+  if(!was)logHist('day','Карта дня: '+A[dayIdx()].name);
+};
+
+const _sub=sub;
+sub=function(pl){
+  _sub(pl);
+  setTimeout(()=>{
+    refreshLocks();
+    const cur=document.querySelector('.page.active');
+    if(cur){const id=cur.id;
+      if(id==='page-matrix')renderMatrix();
+      if(id==='page-history')renderHistory();
+      if(id==='page-horoscope2')renderHoroscope();
+      if(id==='page-compat2')renderCompat();
+      if(id==='page-tarot'){const at=document.querySelector('#page-tarot .sptab.active');
+        if(at&&/Три/.test(at.textContent))renderThree();
+        if(at&&/Кельт/.test(at.textContent))renderCeltic();}
+    }
+  },1500);
+};
+
+const _goTab=goTab;
+goTab=function(t){_goTab(t);if(t==='profile')refreshLocks();};
+
+refreshLocks();
+})();
+</script>
+
+<!-- ══ DONATE MODAL ══ -->
+<div id="donate-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,14,28,.92);backdrop-filter:blur(12px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeDonate()">
+  <div style="background:var(--s1);border:1px solid var(--line2);border-radius:24px 24px 0 0;padding:28px 24px 40px;max-width:430px;width:100%;animation:fi .35s var(--ease)">
+    <div style="width:36px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 24px"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:48px;margin-bottom:10px">🌙</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;margin-bottom:6px">Поддержать Arcana</div>
+      <div style="font-size:13px;color:var(--dim);line-height:1.6;font-weight:500">Если приложение резонирует с вами —<br>вы можете поддержать его развитие</div>
+    </div>
+    <div style="background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">TRC20 · USDT / TRX</div>
+      <div style="font-size:12px;color:var(--text);word-break:break-all;line-height:1.7;font-family:monospace;letter-spacing:.3px">TWTVnB4K6joTih2LFozxhvfBniW4BfpCfH</div>
+      <button onclick="copyDonate()" id="copy-btn" style="margin-top:12px;width:100%;background:linear-gradient(135deg,#B8922A,#E2C88A);color:#0E0F1A;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;padding:11px;cursor:pointer;letter-spacing:.3px">Скопировать адрес</button>
+    </div>
+    <div style="font-size:11px;color:var(--dim);text-align:center;line-height:1.7;font-weight:500">Спасибо — каждый вклад помогает делать<br>Arcana глубже и точнее ✦</div>
+    <button onclick="closeDonate()" style="margin-top:16px;width:100%;background:none;border:1px solid var(--line2);border-radius:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:12px;cursor:pointer">Закрыть</button>
+  </div>
+</div>
+
+<script>
+document.querySelector('.hero-moon').style.cursor='pointer';
+document.querySelector('.hero-moon').addEventListener('click',function(){
+  const m=document.getElementById('donate-modal');
+  m.style.display='flex';
+});
+function closeDonate(){
+  document.getElementById('donate-modal').style.display='none';
+}
+function copyDonate(){
+  navigator.clipboard.writeText('TWTVnB4K6joTih2LFozxhvfBniW4BfpCfH').then(()=>{
+    const btn=document.getElementById('copy-btn');
+    btn.textContent='Скопировано ✦';
+    btn.style.background='linear-gradient(135deg,#4B5EFF,#7B2FBE)';
+    btn.style.color='#fff';
+    setTimeout(()=>{
+      btn.textContent='Скопировать адрес';
+      btn.style.background='linear-gradient(135deg,#B8922A,#E2C88A)';
+      btn.style.color='#0E0F1A';
+    },2000);
+  });
+}
+</script>
+
+<script>
+(function(){
+  const KEY='arc_daily_seed';
+  const todayStr=new Date().toISOString().slice(0,10);
+  let saved=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(!saved||saved.date!==todayStr){
+    saved={date:todayStr,seed:Math.floor(Math.random()*1e9)};
+    localStorage.setItem(KEY,JSON.stringify(saved));
+  }
+  const seed=saved.seed;
+  function seededRand(s){
+    let a=s>>>0;
+    return function(){
+      a=(Math.imul(1664525,a)+1013904223)>>>0;
+      return a/4294967296;
+    };
+  }
+  const rng=seededRand(seed);
+  const cardIdx=Math.floor(rng()*A.length);
+  const isRev=rng()<0.35;
+  window.dayIdx=function(){return cardIdx;};
+  window.dayRev=function(){return isRev;};
+})();
+</script>
+</body>
+</html>
