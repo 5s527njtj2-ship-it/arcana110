@@ -636,6 +636,13 @@ body{color:var(--text);font-family:'Inter',sans-serif;font-size:14px;-webkit-fon
     <div class="curr-b gold hidden" id="prem-curr">✦ Ваш текущий тариф</div>
     <button class="btn btn-g" onclick="sub('premium')">Купить за 489 ⭐</button>
   </div>
+  <div class="block" style="margin-top:4px">
+    <div class="blbl">Промокод</div>
+    <div class="field" style="margin-bottom:12px">
+      <input type="text" id="promo-input" placeholder="Введите промокод"/>
+    </div>
+    <button class="btn btn-o" onclick="applyPromo()">Активировать</button>
+  </div>
   <p style="text-align:center;font-size:11px;color:var(--dim);padding:4px 24px 32px;line-height:1.8;font-weight:500">Оплата через Telegram Stars · Единоразово, навсегда</p>
 </div>
 
@@ -1321,7 +1328,23 @@ function sub(pl){
 /* ═══ TOAST ═══ */
 let _tt;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2800);}
-
+/* ═══ PROMO CODE ═══ */
+const PROMO_CODES = {
+  'Blog X Studio': 'premium'
+};
+function applyPromo(){
+  const input = document.getElementById('promo-input');
+  const code = input.value.trim();
+  if(!code){ toast('Введите промокод'); return; }
+  const plan = PROMO_CODES[code];
+  if(!plan){ toast('Промокод не найден'); return; }
+  S.plan = plan;
+  localStorage.setItem('arc_plan', plan);
+  renderSub(); renderProf(); applyLocks();
+  if (typeof refreshLocks === 'function') refreshLocks();
+  input.value = '';
+  toast('Arcana '+planLbl(plan)+' активирован ✦');
+}
 /* ═══ INIT ═══ */
 (function(){
   const d=new Date();
