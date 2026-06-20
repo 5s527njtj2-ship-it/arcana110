@@ -2,6 +2,7 @@ import asyncio
 import os
 import json
 import logging
+from datetime import datetime, timezone, timedelta
 from aiohttp import web
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import (Message, InlineKeyboardMarkup,
@@ -21,26 +22,33 @@ PROMO_CODE     = "Blog X Studio"
 PROMO_DELAY    = 20  # секунд
 
 PROMO_USERS_FILE = "promo_users.json"
+ALL_USERS_FILE   = "all_users.json"
 
-def load_promo_users():
+def load_set_file(path):
     try:
-        with open(PROMO_USERS_FILE, "r") as f:
+        with open(path, "r") as f:
             return set(json.load(f))
     except Exception:
         return set()
 
-def save_promo_users(users):
+def save_set_file(path, data_set):
     try:
-        with open(PROMO_USERS_FILE, "w") as f:
-            json.dump(list(users), f)
+        with open(path, "w") as f:
+            json.dump(list(data_set), f)
     except Exception:
-        log.exception("failed to save promo users")
+        log.exception(f"failed to save {path}")
 
-promo_users = load_promo_users()
+promo_users = load_set_file(PROMO_USERS_FILE)
+all_users   = load_set_file(ALL_USERS_FILE)
+
+def remember_user(user_id: int):
+    if user_id not in all_users:
+        all_users.add(user_id)
+        save_set_file(ALL_USERS_FILE, all_users)
 
 PRICES = {
-    "pro":     [LabeledPrice(label="Arcana Pro",     amount=299)],
-    "premium": [LabeledPrice(label="Arcana Premium", amount=489)],
+    "pro":     [LabeledPrice(label="Arcana Pro",     amount=49)],
+    "premium": [LabeledPrice(label="Arcana Premium", amount=99)],
 }
 
 TITLES = {
@@ -55,6 +63,12 @@ DESCRIPTIONS = {
 bot = Bot(token=BOT_TOKEN)
 dp  = Dispatcher()
 
+@dp.message.middleware()
+async def remember_user_middleware(handler, event: Message, data):
+    if event.from_user:
+        remember_user(event.from_user.id)
+    return await handler(event, data)
+
 async def send_donate_message(chat_id: int):
     kb = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="✦ Поддержать Arcana", callback_data="show_donate")
@@ -66,6 +80,49 @@ async def send_donate_message(chat_id: int):
         parse_mode="Markdown",
         reply_markup=kb
     )
+
+DAILY_MESSAGE = (
+    "✨ *Доброе утро!* Ваша Карта Дня на сегодня уже доступна.\n\n"
+    "Узнайте, что приготовили для вас карты, и получите персональный совет на день 🔮"
+)
+
+async def send_daily_card_message():
+    kb = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(
+            text="✦ Открыть Arcana",
+            web_app=WebAppInfo(url=WEBAPP_URL)
+        )
+    ]])
+    sent, failed = 0, 0
+    for user_id in list(all_users):
+        try:
+            await bot.send_message(
+                user_id,
+                DAILY_MESSAGE,
+                parse_mode="Markdown",
+                reply_markup=kb
+            )
+            sent += 1
+            await asyncio.sleep(0.05)  # не превышать лимиты Telegram (~20 msg/sec)
+        except Exception:
+            failed += 1
+    log.info(f"Daily card broadcast: sent={sent} failed={failed}")
+
+async def daily_broadcast_scheduler():
+    """Раз в сутки в 6:00 UTC (9:00 МСК) отправляет всем сообщение о карте дня."""
+    TARGET_HOUR_UTC = 6
+    while True:
+        now = datetime.now(timezone.utc)
+        target = now.replace(hour=TARGET_HOUR_UTC, minute=0, second=0, microsecond=0)
+        if target <= now:
+            target += timedelta(days=1)
+        wait_seconds = (target - now).total_seconds()
+        log.info(f"Next daily broadcast in {wait_seconds/3600:.1f} hours")
+        await asyncio.sleep(wait_seconds)
+        try:
+            await send_daily_card_message()
+        except Exception:
+            log.exception("daily broadcast failed")
 
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
@@ -117,7 +174,7 @@ async def handle_donate_screenshot(message: Message):
     async def send_promo_later():
         await asyncio.sleep(PROMO_DELAY)
         promo_users.add(user_id)
-        save_promo_users(promo_users)
+        save_set_file(PROMO_USERS_FILE, promo_users)
         await bot.send_message(
             user_id,
             f"🌟 *Спасибо за поддержку!*\n\n"
@@ -228,6 +285,7 @@ async def start_web_server():
 
 async def main():
     await start_web_server()
+    asyncio.create_task(daily_broadcast_scheduler())
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
